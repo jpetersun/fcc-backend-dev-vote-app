@@ -26,7 +26,7 @@ class Landing extends React.Component {
     return (
       <ul className='demo-list-item mdl-list'>
         {this.state.pollData.map((poll) => (
-          <Poll {...poll} key={poll._id}/>
+          <Poll {...poll} key={poll._id} />
         ))}
       </ul>
     )

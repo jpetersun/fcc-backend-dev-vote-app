@@ -1,12 +1,10 @@
 webpackJsonp([1],{
 
-/***/ 239:
+/***/ 244:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -16,60 +14,93 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var React = __webpack_require__(6);
-var Poll = __webpack_require__(265);
-// const fakeData = require('../public/data.json')
-// console.log(fakeData)
-// const { object, arrayOf } = React.PropTypes
-// console.log(polls)
-var axios = __webpack_require__(247);
+var React = __webpack_require__(5);
+var axios = __webpack_require__(253);
 
-var Landing = function (_React$Component) {
-  _inherits(Landing, _React$Component);
+var Details = function (_React$Component) {
+  _inherits(Details, _React$Component);
 
-  function Landing(props) {
-    _classCallCheck(this, Landing);
+  function Details(props) {
+    _classCallCheck(this, Details);
 
-    var _this = _possibleConstructorReturn(this, (Landing.__proto__ || Object.getPrototypeOf(Landing)).call(this, props));
+    var _this = _possibleConstructorReturn(this, (Details.__proto__ || Object.getPrototypeOf(Details)).call(this, props));
 
-    _this.state = {
-      pollData: []
-    };
+    _this.state = { value: 'coconut' };
+
+    _this.handleChange = _this.handleChange.bind(_this);
+    _this.handleSubmit = _this.handleSubmit.bind(_this);
     return _this;
   }
 
-  _createClass(Landing, [{
-    key: 'componentDidMount',
-    value: function componentDidMount() {
-      var _this2 = this;
-
-      axios.get('/polls').then(function (response) {
-        _this2.setState({ pollData: response.data });
-      }).catch(function (error) {
-        console.error('axios error', error);
+  _createClass(Details, [{
+    key: 'handleChange',
+    value: function handleChange(event) {
+      this.setState({ value: event.target.value });
+    }
+  }, {
+    key: 'handleSubmit',
+    value: function handleSubmit(event) {
+      console.log(this.state);
+      event.preventDefault();
+      axios.post('http://127.0.0.1:/27017/vote-app', { firstName: 'Marlon', lastName: 'Bernardes' }).then(function (response) {
+        console.log('saved successfully');
       });
     }
   }, {
     key: 'render',
     value: function render() {
-      return React.createElement(
-        'ul',
-        { className: 'demo-list-item mdl-list' },
-        this.state.pollData.map(function (poll) {
-          return React.createElement(Poll, _extends({}, poll, { key: poll._id }));
-        })
+      return (
+        // <form onSubmit={this.handleSubmit}>
+        React.createElement(
+          'form',
+          { method: 'post', action: '/poll-results' },
+          React.createElement(
+            'label',
+            null,
+            React.createElement(
+              'p',
+              null,
+              'Pick your favorite La Croix flavor:'
+            ),
+            React.createElement(
+              'select',
+              { value: this.state.value, onChange: this.handleChange, name: 'selectpicker' },
+              React.createElement(
+                'option',
+                { name: 'option1', value: 'grapefruit' },
+                'Grapefruit'
+              ),
+              React.createElement(
+                'option',
+                { name: 'option2', value: 'lime' },
+                'Lime'
+              ),
+              React.createElement(
+                'option',
+                { name: 'option3', value: 'coconut' },
+                'Coconut'
+              ),
+              React.createElement(
+                'option',
+                { name: 'option4', value: 'mango' },
+                'Mango'
+              )
+            )
+          ),
+          React.createElement('input', { type: 'submit', value: 'Submit' })
+        )
       );
     }
   }]);
 
-  return Landing;
+  return Details;
 }(React.Component);
 
-module.exports = Landing;
+module.exports = Details;
 
 /***/ }),
 
-/***/ 240:
+/***/ 246:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -77,7 +108,7 @@ module.exports = Landing;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var bind = __webpack_require__(246);
+var bind = __webpack_require__(252);
 
 /*global toString:true*/
 
@@ -373,14 +404,14 @@ module.exports = {
 
 /***/ }),
 
-/***/ 241:
+/***/ 247:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(process) {
 
-var utils = __webpack_require__(240);
-var normalizeHeaderName = __webpack_require__(262);
+var utils = __webpack_require__(246);
+var normalizeHeaderName = __webpack_require__(268);
 
 var PROTECTION_PREFIX = /^\)\]\}',?\n/;
 var DEFAULT_CONTENT_TYPE = {
@@ -397,10 +428,10 @@ function getDefaultAdapter() {
   var adapter;
   if (typeof XMLHttpRequest !== 'undefined') {
     // For browsers use XHR adapter
-    adapter = __webpack_require__(242);
+    adapter = __webpack_require__(248);
   } else if (typeof process !== 'undefined') {
     // For node use HTTP adapter
-    adapter = __webpack_require__(242);
+    adapter = __webpack_require__(248);
   }
   return adapter;
 }
@@ -469,19 +500,19 @@ module.exports = defaults;
 
 /***/ }),
 
-/***/ 242:
+/***/ 248:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(process) {
 
-var utils = __webpack_require__(240);
-var settle = __webpack_require__(254);
-var buildURL = __webpack_require__(257);
-var parseHeaders = __webpack_require__(263);
-var isURLSameOrigin = __webpack_require__(261);
-var createError = __webpack_require__(245);
-var btoa = typeof window !== 'undefined' && window.btoa && window.btoa.bind(window) || __webpack_require__(256);
+var utils = __webpack_require__(246);
+var settle = __webpack_require__(260);
+var buildURL = __webpack_require__(263);
+var parseHeaders = __webpack_require__(269);
+var isURLSameOrigin = __webpack_require__(267);
+var createError = __webpack_require__(251);
+var btoa = typeof window !== 'undefined' && window.btoa && window.btoa.bind(window) || __webpack_require__(262);
 
 module.exports = function xhrAdapter(config) {
   return new Promise(function dispatchXhrRequest(resolve, reject) {
@@ -574,7 +605,7 @@ module.exports = function xhrAdapter(config) {
     // This is only done if running in a standard browser environment.
     // Specifically not if we're in a web worker, or react-native.
     if (utils.isStandardBrowserEnv()) {
-      var cookies = __webpack_require__(259);
+      var cookies = __webpack_require__(265);
 
       // Add xsrf header
       var xsrfValue = (config.withCredentials || isURLSameOrigin(config.url)) && config.xsrfCookieName ? cookies.read(config.xsrfCookieName) : undefined;
@@ -649,7 +680,7 @@ module.exports = function xhrAdapter(config) {
 
 /***/ }),
 
-/***/ 243:
+/***/ 249:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -676,7 +707,7 @@ module.exports = Cancel;
 
 /***/ }),
 
-/***/ 244:
+/***/ 250:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -688,13 +719,13 @@ module.exports = function isCancel(value) {
 
 /***/ }),
 
-/***/ 245:
+/***/ 251:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var enhanceError = __webpack_require__(253);
+var enhanceError = __webpack_require__(259);
 
 /**
  * Create an Error with the specified message, config, error code, and response.
@@ -712,7 +743,7 @@ module.exports = function createError(message, config, code, response) {
 
 /***/ }),
 
-/***/ 246:
+/***/ 252:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -730,26 +761,26 @@ module.exports = function bind(fn, thisArg) {
 
 /***/ }),
 
-/***/ 247:
+/***/ 253:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-module.exports = __webpack_require__(248);
+module.exports = __webpack_require__(254);
 
 /***/ }),
 
-/***/ 248:
+/***/ 254:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(240);
-var bind = __webpack_require__(246);
-var Axios = __webpack_require__(250);
-var defaults = __webpack_require__(241);
+var utils = __webpack_require__(246);
+var bind = __webpack_require__(252);
+var Axios = __webpack_require__(256);
+var defaults = __webpack_require__(247);
 
 /**
  * Create an instance of Axios
@@ -782,15 +813,15 @@ axios.create = function create(instanceConfig) {
 };
 
 // Expose Cancel & CancelToken
-axios.Cancel = __webpack_require__(243);
-axios.CancelToken = __webpack_require__(249);
-axios.isCancel = __webpack_require__(244);
+axios.Cancel = __webpack_require__(249);
+axios.CancelToken = __webpack_require__(255);
+axios.isCancel = __webpack_require__(250);
 
 // Expose all/spread
 axios.all = function all(promises) {
   return Promise.all(promises);
 };
-axios.spread = __webpack_require__(264);
+axios.spread = __webpack_require__(270);
 
 module.exports = axios;
 
@@ -799,13 +830,13 @@ module.exports.default = axios;
 
 /***/ }),
 
-/***/ 249:
+/***/ 255:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var Cancel = __webpack_require__(243);
+var Cancel = __webpack_require__(249);
 
 /**
  * A `CancelToken` is an object that can be used to request cancellation of an operation.
@@ -863,18 +894,18 @@ module.exports = CancelToken;
 
 /***/ }),
 
-/***/ 250:
+/***/ 256:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var defaults = __webpack_require__(241);
-var utils = __webpack_require__(240);
-var InterceptorManager = __webpack_require__(251);
-var dispatchRequest = __webpack_require__(252);
-var isAbsoluteURL = __webpack_require__(260);
-var combineURLs = __webpack_require__(258);
+var defaults = __webpack_require__(247);
+var utils = __webpack_require__(246);
+var InterceptorManager = __webpack_require__(257);
+var dispatchRequest = __webpack_require__(258);
+var isAbsoluteURL = __webpack_require__(266);
+var combineURLs = __webpack_require__(264);
 
 /**
  * Create a new instance of Axios
@@ -955,13 +986,13 @@ module.exports = Axios;
 
 /***/ }),
 
-/***/ 251:
+/***/ 257:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(240);
+var utils = __webpack_require__(246);
 
 function InterceptorManager() {
   this.handlers = [];
@@ -1014,16 +1045,16 @@ module.exports = InterceptorManager;
 
 /***/ }),
 
-/***/ 252:
+/***/ 258:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(240);
-var transformData = __webpack_require__(255);
-var isCancel = __webpack_require__(244);
-var defaults = __webpack_require__(241);
+var utils = __webpack_require__(246);
+var transformData = __webpack_require__(261);
+var isCancel = __webpack_require__(250);
+var defaults = __webpack_require__(247);
 
 /**
  * Throws a `Cancel` if cancellation has been requested.
@@ -1081,7 +1112,7 @@ module.exports = function dispatchRequest(config) {
 
 /***/ }),
 
-/***/ 253:
+/***/ 259:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1108,13 +1139,13 @@ module.exports = function enhanceError(error, config, code, response) {
 
 /***/ }),
 
-/***/ 254:
+/***/ 260:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var createError = __webpack_require__(245);
+var createError = __webpack_require__(251);
 
 /**
  * Resolve or reject a Promise based on response status.
@@ -1135,13 +1166,13 @@ module.exports = function settle(resolve, reject, response) {
 
 /***/ }),
 
-/***/ 255:
+/***/ 261:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(240);
+var utils = __webpack_require__(246);
 
 /**
  * Transform the data for a request or a response
@@ -1162,7 +1193,7 @@ module.exports = function transformData(data, headers, fns) {
 
 /***/ }),
 
-/***/ 256:
+/***/ 262:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1204,13 +1235,13 @@ module.exports = btoa;
 
 /***/ }),
 
-/***/ 257:
+/***/ 263:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(240);
+var utils = __webpack_require__(246);
 
 function encode(val) {
   return encodeURIComponent(val).replace(/%40/gi, '@').replace(/%3A/gi, ':').replace(/%24/g, '$').replace(/%2C/gi, ',').replace(/%20/g, '+').replace(/%5B/gi, '[').replace(/%5D/gi, ']');
@@ -1272,7 +1303,7 @@ module.exports = function buildURL(url, params, paramsSerializer) {
 
 /***/ }),
 
-/***/ 258:
+/***/ 264:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1292,13 +1323,13 @@ module.exports = function combineURLs(baseURL, relativeURL) {
 
 /***/ }),
 
-/***/ 259:
+/***/ 265:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(240);
+var utils = __webpack_require__(246);
 
 module.exports = utils.isStandardBrowserEnv() ?
 
@@ -1352,7 +1383,7 @@ function nonStandardBrowserEnv() {
 
 /***/ }),
 
-/***/ 260:
+/***/ 266:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1375,13 +1406,13 @@ module.exports = function isAbsoluteURL(url) {
 
 /***/ }),
 
-/***/ 261:
+/***/ 267:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(240);
+var utils = __webpack_require__(246);
 
 module.exports = utils.isStandardBrowserEnv() ?
 
@@ -1445,13 +1476,13 @@ function nonStandardBrowserEnv() {
 
 /***/ }),
 
-/***/ 262:
+/***/ 268:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(240);
+var utils = __webpack_require__(246);
 
 module.exports = function normalizeHeaderName(headers, normalizedName) {
   utils.forEach(headers, function processHeader(value, name) {
@@ -1464,13 +1495,13 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
 
 /***/ }),
 
-/***/ 263:
+/***/ 269:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(240);
+var utils = __webpack_require__(246);
 
 /**
  * Parse headers into an object
@@ -1510,7 +1541,7 @@ module.exports = function parseHeaders(headers) {
 
 /***/ }),
 
-/***/ 264:
+/***/ 270:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1542,44 +1573,6 @@ module.exports = function spread(callback) {
     return callback.apply(null, arr);
   };
 };
-
-/***/ }),
-
-/***/ 265:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var React = __webpack_require__(6);
-
-var _require = __webpack_require__(64),
-    Link = _require.Link;
-
-var Poll = function Poll(props) {
-  return React.createElement(
-    Link,
-    { to: '/#' },
-    React.createElement(
-      'li',
-      { className: 'mdl-list__item' },
-      React.createElement(
-        'span',
-        { className: 'mdl-list__item-primary-content' },
-        props.name
-      )
-    )
-  );
-};
-
-var string = React.PropTypes.string;
-
-
-Poll.propTypes = {
-  name: string.isRequired
-};
-
-module.exports = Poll;
 
 /***/ })
 
