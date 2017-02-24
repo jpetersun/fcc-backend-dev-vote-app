@@ -4,9 +4,11 @@ const Layout = (props) => (
   <div className='mdl-layout mdl-js-layout mdl-layout--fixed-header'>
     <header className='mdl-layout__header'>
       <div className='mdl-layout__header-row'>
-        <h4 className='mdl-layout-spacer layout-title'>Vote App</h4>
+        <h4 className='mdl-layout-spacer layout-title'>
+          <a style={{color: '#fff', textDecoration: 'none'}} href='/'>Vote App</a>
+        </h4>
         <nav className='mdl-navigation mdl-layout--large-screen-only'>
-          <a className='mdl-navigation__link' href=''>Link</a>
+          <a className='mdl-navigation__link' href='/create-poll'>Create Poll</a>
           <a className='mdl-navigation__link' href=''>Link</a>
           <a className='mdl-navigation__link' href=''>Link</a>
           <a className='mdl-navigation__link' href=''>Link</a>

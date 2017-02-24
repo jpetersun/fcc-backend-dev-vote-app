@@ -28,6 +28,14 @@ const rootRoute = {
           cb(null, require('./Details'))
         })
       }
+    },
+    {
+      path: 'create-poll',
+      getComponent (location, cb) {
+        require.ensure([], () => {
+          cb(null, require('./CreatePoll'))
+        })
+      }
     }
   ]
 }

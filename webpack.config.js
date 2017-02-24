@@ -1,4 +1,5 @@
 const path = require('path')
+const LiveReloadPlugin = require('webpack-livereload-plugin')
 
 module.exports = {
   context: __dirname,
@@ -36,5 +37,8 @@ module.exports = {
         loader: 'css-loader'
       }
     ]
-  }
+  },
+  plugins: [
+    new LiveReloadPlugin()
+  ]
 }

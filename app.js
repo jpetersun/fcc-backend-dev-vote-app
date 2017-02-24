@@ -18,20 +18,23 @@ const bodyParser = require('body-parser')
 const app = express()
 
 app.use('/public', express.static('./public'))
+app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
 const mongoose = require('mongoose')
 
 mongoose.connect('mongodb://localhost:27017/vote-app')
+const optionSchema = mongoose.Schema({
+  name: String,
+  votes: Number
+})
 const pollSchema = mongoose.Schema({
   name: String,
-  options: Array
+  options: [optionSchema]
 })
 const Poll = mongoose.model('Poll', pollSchema)
+const Option = mongoose.model('Option', optionSchema)
 
-const optionsSchema = mongoose.Schema({
-
-})
 
 // console.log(allPolls.then)
 app.get('/polls', (req, res) => {
@@ -40,13 +43,54 @@ app.get('/polls', (req, res) => {
     res.send(poll)
   })
 })
-app.post('/poll-results', (req, res) => {
-  let poll = new Poll({ name: req.body.selectpicker, options: []})
+
+app.get('/polls/:id', (req, res) => {
+  const thePoll = Poll.findOne({ _id: req.params.id })
+  thePoll.then((poll) => {
+    res.send(poll)
+  })
+})
+
+app.post('/poll-results/:id', (req, res) => {
+  // console.log(req.params.id)
+  console.log(req.body)
+  Poll.findById(req.params.id, (err, poll) => {
+    if (err) console.error(err)
+    const option = poll.options.id(req.body._id)
+    option.votes += 1
+
+    poll.save()
+    res.send(option)
+  })
+})
+
+app.post('/create-poll', (req, res) => {
+  let poll = new Poll({
+    name: req.body.poll.name,
+    options: [
+      // new Option({
+      //   name:req.body.poll.option1,
+      //   votes: 0
+      // }),
+      // new Option({
+      //   name:req.body.poll.option2,
+      //   votes: 0
+      // })
+      {
+        name: req.body.poll.option1,
+        votes: 0
+      },
+      {
+        name: req.body.poll.option2,
+        votes: 0
+      }
+    ]
+  })
   poll.save((err, poll) => {
     if (err) return console.error(err)
   })
   console.log(req.body)
-  res.send('hi')
+  res.redirect('/')
 })
 
 app.use((req, res) => {
