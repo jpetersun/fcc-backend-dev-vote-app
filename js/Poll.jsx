@@ -12,6 +12,7 @@ const Poll = (props) => {
     </Link>
   )
 }
+
 const { string } = React.PropTypes
 
 Poll.propTypes = {

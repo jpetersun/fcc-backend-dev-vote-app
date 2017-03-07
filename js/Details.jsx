@@ -3,6 +3,11 @@ const PollOption = require('./PollOption')
 const axios = require('axios')
 const _ = require('lodash')
 
+if (typeof window === 'undefined') {
+  global.window = {}
+}
+
+const Doughnut = require('react-chartjs-2').Doughnut
 class Details extends React.Component {
   constructor (props) {
     super(props)
@@ -14,18 +19,34 @@ class Details extends React.Component {
           {name: '', _id: '2'}
         ]
       },
-      value: ''
+      chartData: {
+        labels: [
+          'Red',
+          'Blue'
+        ],
+        datasets: [{
+          data: ['', ''],
+          backgroundColor: [
+            '#FF6384',
+            '#36A2EB'
+          ],
+          hoverBackgroundColor: [
+            '#FF6384',
+            '#36A2EB'
+          ]
+        }]
+      }
     }
-
+    this.value = ''
     this.handleChange = this.handleChange.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
   }
 
   handleChange (event) {
-    this.setState({value: event.target.value})
+    this.value = event.target.value
   }
   handleSubmit (event) {
-    const value = this.state.value
+    const value = this.value
     const obj = _.find(this.state.pollData.options, {name: value})
     const name = obj.name
     const id = obj._id
@@ -35,6 +56,37 @@ class Details extends React.Component {
     })
     .then((response) => {
       console.log(response)
+      axios.get(`/polls/${this.props.params.id}`)
+      .then((response) => {
+        // console.log(response)
+        // const firstOption = response.data.options[0].name
+        this.setState({chartData:
+        {
+          labels: [
+            response.data.options[0].name,
+            response.data.options[1].name
+          ],
+          datasets: [{
+            data: [
+              response.data.options[0].votes,
+              response.data.options[1].votes
+            ],
+            backgroundColor: [
+              '#FF6384',
+              '#36A2EB'
+            ],
+            hoverBackgroundColor: [
+              '#FF6384',
+              '#36A2EB'
+            ]
+          }]
+        }
+        })
+        this.refs.canvas.chart_instance.update()
+      })
+      .catch((error) => {
+        console.error('axios error', error)
+      })
     })
     .catch((error) => {
       console.error('axios error', error)
@@ -46,7 +98,30 @@ class Details extends React.Component {
     axios.get(`/polls/${this.props.params.id}`)
       .then((response) => {
         const firstOption = response.data.options[0].name
-        this.setState({ pollData: response.data, value: firstOption })
+        this.value = firstOption
+        this.setState({ pollData: response.data })
+        this.setState({chartData:
+        {
+          labels: [
+            response.data.options[0].name,
+            response.data.options[1].name
+          ],
+          datasets: [{
+            data: [
+              response.data.options[0].votes,
+              response.data.options[1].votes
+            ],
+            backgroundColor: [
+              '#FF6384',
+              '#36A2EB'
+            ],
+            hoverBackgroundColor: [
+              '#FF6384',
+              '#36A2EB'
+            ]
+          }]
+        }
+        })
       })
       .catch((error) => {
         console.error('axios error', error)
@@ -55,17 +130,20 @@ class Details extends React.Component {
 
   render () {
     return (
-      <form onSubmit={this.handleSubmit}method='post' action='/poll-results'>
-        <label>
-          <p>Pick your favorite: {this.state.pollData.name}</p>
-          <select onChange={this.handleChange} name='selectpicker'>
-            {this.state.pollData.options.map((option) => (
-              <PollOption {...option} key={option._id} />
-            ))}
-          </select>
-        </label>
-        <input type='submit' value='Submit' />
-      </form>
+      <div>
+        <Doughnut ref='canvas' data={this.state.chartData} />
+        <form onSubmit={this.handleSubmit} method='post' action='/poll-results'>
+          <label>
+            <p>Pick your favorite: {this.state.pollData.name}</p>
+            <select onChange={this.handleChange} name='selectpicker'>
+              {this.state.pollData.options.map((option) => (
+                <PollOption {...option} key={option._id} />
+              ))}
+            </select>
+          </label>
+          <input type='submit' value='Submit' />
+        </form>
+      </div>
     )
   }
 }
