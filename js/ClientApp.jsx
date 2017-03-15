@@ -22,7 +22,7 @@ const rootRoute = {
   },
   childRoutes: [
     {
-      path: 'details/:id',
+      path: 'details/:userId/:id',
       getComponent (location, cb) {
         require.ensure([], () => {
           cb(null, require('./Details'))
@@ -34,6 +34,22 @@ const rootRoute = {
       getComponent (location, cb) {
         require.ensure([], () => {
           cb(null, require('./CreatePoll'))
+        })
+      }
+    },
+    {
+      path: 'login',
+      getComponent (location, cb) {
+        require.ensure([], () => {
+          cb(null, require('./Login'))
+        })
+      }
+    },
+    {
+      path: 'account',
+      getComponent (location, cb) {
+        require.ensure([], () => {
+          cb(null, require('./Account'))
         })
       }
     }

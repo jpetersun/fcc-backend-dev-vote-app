@@ -10,22 +10,29 @@ class Landing extends React.Component {
     super(props)
 
     this.state = {
-      pollData: []
+      userData: []
     }
   }
   componentDidMount () {
     axios.get('/polls')
       .then((response) => {
-        this.setState({ pollData: response.data })
+        this.setState({ userData: response.data })
       })
       .catch((error) => {
         console.error('axios error', error)
       })
   }
   render () {
+    const polls = []
+    this.state.userData.forEach((user) => {
+      user.polls.forEach((poll) => {
+        poll.userId = user._id
+        polls.push(poll)
+      })
+    })
     return (
       <ul className='demo-list-item mdl-list'>
-        {this.state.pollData.map((poll) => (
+        {polls.map((poll) => (
           <Poll {...poll} key={poll._id} />
         ))}
       </ul>

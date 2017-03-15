@@ -50,26 +50,28 @@ class Details extends React.Component {
     const obj = _.find(this.state.pollData.options, {name: value})
     const name = obj.name
     const id = obj._id
-    axios.post(`/poll-results/${this.props.params.id}`, {
+    // console.log(name)
+    // console.log(id)
+    axios.post(`/poll-results/${this.props.params.userId}/${this.props.params.id}`, {
       name: name,
       _id: id
     })
     .then((response) => {
-      console.log(response)
-      axios.get(`/polls/${this.props.params.id}`)
+      axios.get(`/polls/${this.props.params.userId}/${this.props.params.id}`)
       .then((response) => {
         // console.log(response)
-        // const firstOption = response.data.options[0].name
+        const data = response.data[0]
+        // const firstOption = response.data[0].options[0].name
         this.setState({chartData:
         {
           labels: [
-            response.data.options[0].name,
-            response.data.options[1].name
+            data.options[0].name,
+            data.options[1].name
           ],
           datasets: [{
             data: [
-              response.data.options[0].votes,
-              response.data.options[1].votes
+              data.options[0].votes,
+              data.options[1].votes
             ],
             backgroundColor: [
               '#FF6384',
@@ -95,21 +97,22 @@ class Details extends React.Component {
   }
 
   componentDidMount () {
-    axios.get(`/polls/${this.props.params.id}`)
+    axios.get(`/polls/${this.props.params.userId}/${this.props.params.id}`)
       .then((response) => {
-        const firstOption = response.data.options[0].name
+        const data = response.data[0]
+        const firstOption = data.options[0].name
         this.value = firstOption
-        this.setState({ pollData: response.data })
+        this.setState({ pollData: response.data[0] })
         this.setState({chartData:
         {
           labels: [
-            response.data.options[0].name,
-            response.data.options[1].name
+            data.options[0].name,
+            data.options[1].name
           ],
           datasets: [{
             data: [
-              response.data.options[0].votes,
-              response.data.options[1].votes
+              data.options[0].votes,
+              data.options[1].votes
             ],
             backgroundColor: [
               '#FF6384',

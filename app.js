@@ -14,16 +14,14 @@ const template = _.template(baseTemplate)
 const ClientApp = require('./js/ClientApp.jsx')
 const Routes = ClientApp.Routes
 const bodyParser = require('body-parser')
+const session = require('express-session')
+const passport = require('passport')
+const GitHubStrategy = require('passport-github2').Strategy
 
-const app = express()
-
-app.use('/public', express.static('./public'))
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: true }))
-
+const GITHUB_CLIENT_ID = "5f05c2d5f34d08bed5b8";
+const GITHUB_CLIENT_SECRET = "080c7113b4430bfb74a781232d8f144a67acc837";
 const mongoose = require('mongoose')
 
-mongoose.connect('mongodb://localhost:27017/vote-app')
 const optionSchema = mongoose.Schema({
   name: String,
   votes: Number
@@ -35,61 +33,222 @@ const pollSchema = mongoose.Schema({
 const Poll = mongoose.model('Poll', pollSchema)
 const Option = mongoose.model('Option', optionSchema)
 
+// user
+const userSchema = new mongoose.Schema({
+  name: String,
+  someID: String,
+  avatar: String,
+  polls: [pollSchema]
+})
+const User = mongoose.model('User', userSchema);
+
+
+passport.use(new GitHubStrategy({
+    clientID: GITHUB_CLIENT_ID,
+    clientSecret: GITHUB_CLIENT_SECRET,
+    callbackURL: "http://127.0.0.1:3000/auth/github/callback"
+  },
+  function(accessToken, refreshToken, profile, done) {
+    // asynchronous verification, for effect...
+    // process.nextTick(function () {
+
+      // To keep the example simple, the user's GitHub profile is returned to
+      // represent the logged-in user.  In a typical application, you would want
+      // to associate the GitHub account with a user record in your database,
+      // and return that user instead.
+    var searchQuery = {
+      name: profile.displayName
+    };
+
+    var updates = {
+      name: profile.displayName,
+      someID: profile.id,
+      avatar: profile._json.avatar_url
+    };
+
+    var options = {
+      upsert: true
+    };
+
+    // update the user if s/he exists or add a new user
+    User.findOneAndUpdate(searchQuery, updates, options, function(err, user) {
+      if(err) {
+        return done(err);
+      } else {
+        return done(null, user);
+      }
+    });
+    //   return done(null, profile);
+    // });
+  }
+));
+
+passport.serializeUser(function(user, done) {
+  done(null, user.id);
+});
+
+passport.deserializeUser(function(id, done) {
+  User.findById(id, function (err, user) {
+    done(err, user);
+  });
+});
+const app = express()
+
+app.use('/public', express.static('./public'))
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }))
+app.use(session({ secret: 'keyboard cat', resave: false, saveUninitialized: false}))
+app.use(passport.initialize())
+app.use(passport.session())
+
+app.get('/account-details', ensureAuthenticated, function(req, res) {
+  const theUser = User.findOne({ someID: req.user.someID })
+  theUser.then((user) => {
+    res.send(user)
+  })
+});
+
+// app.get('/login', function(req, res){
+//   console.log(req.user)
+//   res.render('login', { user: req.user });
+// });
+
+app.get('/auth/github',
+  passport.authenticate('github', { scope: [ 'user:email' ] }),
+  function(req, res){
+    // The request will be redirected to GitHub for authentication, so this
+    // function will not be called.
+  });
+
+app.get('/auth/github/callback',
+  passport.authenticate('github', { failureRedirect: '/login' }),
+  function(req, res) {
+    // console.log(req.user)
+    res.redirect('/');
+  });
+
+app.get('/logout', function(req, res){
+  req.logout();
+  res.redirect('/');
+});
+
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) { return next(); }
+  res.redirect('/login')
+}
+
+
+mongoose.connect('mongodb://localhost:27017/vote-app')
+
+
+app.delete('/user-poll/:userId/:id', (req, res) => {
+  const theUser = User.findOne({ _id: req.params.userId })
+  theUser.then((user) => {
+    const polls = user.polls
+    const filteredPolls = polls.filter((item) => {
+      return String(item._id) !== req.params.id
+    })
+    user.polls = filteredPolls
+    user.save()
+    res.end()
+  })
+})
 
 // console.log(allPolls.then)
 app.get('/polls', (req, res) => {
-  const polls = Poll.find({})
-  polls.then((poll) => {
-    res.send(poll)
+  const users = User.find({})
+  users.then((user) => {
+    res.send(user)
+  })
+  // const polls = Poll.find({})
+  // polls.then((poll) => {
+  //   res.send(poll)
+  // })
+})
+
+app.get('/polls/:userId/:id', (req, res) => {
+  const theUser = User.findOne({ _id: req.params.userId })
+  theUser.then((user) => {
+    const polls = user.polls
+    const thePoll = polls.filter((item) => {
+      return String(item._id) === req.params.id
+    })
+    // console.log(thePoll)
+    res.send(thePoll)
   })
 })
 
-app.get('/polls/:id', (req, res) => {
-  const thePoll = Poll.findOne({ _id: req.params.id })
-  thePoll.then((poll) => {
-    res.send(poll)
-  })
-})
-
-app.post('/poll-results/:id', (req, res) => {
+app.post('/poll-results/:userId/:id', (req, res) => {
   // console.log(req.params.id)
-  console.log(req.body)
-  Poll.findById(req.params.id, (err, poll) => {
+  // console.log(req.body)
+  User.findById(req.params.userId, (err, user) => {
     if (err) console.error(err)
-    const option = poll.options.id(req.body._id)
+    const polls = user.polls
+    const thePoll = polls.filter((item) => {
+      return String(item._id) === req.params.id
+    })
+    // console.log(thePoll)
+    const option = thePoll[0].options.id(req.body._id)
     option.votes += 1
-
-    poll.save()
+    user.save()
     res.send(option)
   })
+  // Poll.findById(req.params.id, (err, poll) => {
+  //   if (err) console.error(err)
+  //   const option = poll.options.id(req.body._id)
+  //   option.votes += 1
+
+  //   poll.save()
+  //   res.send(option)
+  // })
 })
 
-app.post('/create-poll', (req, res) => {
-  let poll = new Poll({
-    name: req.body.poll.name,
-    options: [
-      // new Option({
-      //   name:req.body.poll.option1,
-      //   votes: 0
-      // }),
-      // new Option({
-      //   name:req.body.poll.option2,
-      //   votes: 0
-      // })
-      {
-        name: req.body.poll.option1,
-        votes: 0
-      },
-      {
-        name: req.body.poll.option2,
-        votes: 0
-      }
-    ]
+app.use('/create-poll', ensureAuthenticated, (req, res, next) => {
+  next()
+})
+
+app.use('/account', ensureAuthenticated, (req, res, next) => {
+  next()
+})
+
+app.post('/create-poll', ensureAuthenticated, (req, res) => {
+  // console.log(req.user)
+  User.findById(req.user._id, (err, user) => {
+    if (err) console.error(err)
+    user.polls.push({
+      name: req.body.poll.name,
+      options: [
+        {
+          name: req.body.poll.option1,
+          votes: 0
+        },
+        {
+          name: req.body.poll.option2,
+          votes: 0
+        }
+      ]
+    })
+    user.save((err, user) => {
+      if (err) return console.error(err)
+    })
   })
-  poll.save((err, poll) => {
-    if (err) return console.error(err)
-  })
-  console.log(req.body)
+
+  // let poll = new Poll({
+  //   name: req.body.poll.name,
+  //   options: [
+  //     {
+  //       name: req.body.poll.option1,
+  //       votes: 0
+  //     },
+  //     {
+  //       name: req.body.poll.option2,
+  //       votes: 0
+  //     }
+  //   ]
+  // })
+  // poll.save((err, poll) => {
+  //   if (err) return console.error(err)
+  // })
   res.redirect('/')
 })
 
