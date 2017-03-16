@@ -27,6 +27,7 @@ var CreatePoll = function (_React$Component) {
     _this.state = { value: '' };
 
     _this.handleChange = _this.handleChange.bind(_this);
+    _this.handleAddOption = _this.handleAddOption.bind(_this);
     return _this;
   }
 
@@ -34,6 +35,11 @@ var CreatePoll = function (_React$Component) {
     key: 'handleChange',
     value: function handleChange(event) {
       this.setState({ value: event.target.value });
+    }
+  }, {
+    key: 'handleAddOption',
+    value: function handleAddOption(event) {
+      React.createElement('input', []);
     }
   }, {
     key: 'render',
@@ -45,6 +51,11 @@ var CreatePoll = function (_React$Component) {
           'p',
           null,
           'Create A Poll'
+        ),
+        React.createElement(
+          'button',
+          { onClick: this.handleAddOption },
+          'Add Option'
         ),
         React.createElement(
           'label',
