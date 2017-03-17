@@ -23,11 +23,17 @@ const GITHUB_CLIENT_SECRET = "080c7113b4430bfb74a781232d8f144a67acc837";
 const mongoose = require('mongoose')
 
 const optionSchema = mongoose.Schema({
-  name: String,
+  name: {
+    type: String,
+    required: true
+  },
   votes: Number
 })
 const pollSchema = mongoose.Schema({
-  name: String,
+  name: {
+    type: String,
+    required: true
+  },
   options: [optionSchema]
 })
 const Poll = mongoose.model('Poll', pollSchema)
@@ -203,35 +209,34 @@ app.post('/poll-results/:userId/:id', (req, res) => {
   // })
 })
 
-app.use('/create-poll', ensureAuthenticated, (req, res, next) => {
+app.get('/create-poll', ensureAuthenticated, (req, res, next) => {
   next()
 })
 
-app.use('/account', ensureAuthenticated, (req, res, next) => {
+app.get('/account', ensureAuthenticated, (req, res, next) => {
   next()
 })
 
 app.post('/create-poll', ensureAuthenticated, (req, res) => {
-  // console.log(req.user)
-  User.findById(req.user._id, (err, user) => {
-    if (err) console.error(err)
+  // console.log(req.body)
+  const theUser = User.findOne({ _id: req.user._id })
+  theUser.then((user) => {
+    const options = []
+    req.body.values.forEach((value) => {
+      options.push({
+        name: value,
+        votes: 0
+      })
+    })
     user.polls.push({
-      name: req.body.poll.name,
-      options: [
-        {
-          name: req.body.poll.option1,
-          votes: 0
-        },
-        {
-          name: req.body.poll.option2,
-          votes: 0
-        }
-      ]
+      name: req.body.name,
+      options: options
     })
     user.save((err, user) => {
       if (err) return console.error(err)
     })
   })
+  res.redirect('/')
 
   // let poll = new Poll({
   //   name: req.body.poll.name,
@@ -249,7 +254,6 @@ app.post('/create-poll', ensureAuthenticated, (req, res) => {
   // poll.save((err, poll) => {
   //   if (err) return console.error(err)
   // })
-  res.redirect('/')
 })
 
 app.use((req, res) => {

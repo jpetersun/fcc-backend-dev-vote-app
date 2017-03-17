@@ -43,14 +43,14 @@ var Details = function (_React$Component) {
         labels: ['Red', 'Blue'],
         datasets: [{
           data: ['', ''],
-          backgroundColor: ['#FF6384', '#36A2EB'],
-          hoverBackgroundColor: ['#FF6384', '#36A2EB']
+          backgroundColor: [_this.randyColor1, '#36A2EB']
         }]
       }
     };
     _this.value = '';
     _this.handleChange = _this.handleChange.bind(_this);
     _this.handleSubmit = _this.handleSubmit.bind(_this);
+    _this.randyColors = [];
     return _this;
   }
 
@@ -68,26 +68,26 @@ var Details = function (_React$Component) {
       var obj = _.find(this.state.pollData.options, { name: value });
       var name = obj.name;
       var id = obj._id;
-      // console.log(name)
-      // console.log(id)
       axios.post('/poll-results/' + this.props.params.userId + '/' + this.props.params.id, {
         name: name,
         _id: id
       }).then(function (response) {
         axios.get('/polls/' + _this2.props.params.userId + '/' + _this2.props.params.id).then(function (response) {
-          // console.log(response)
           var data = response.data[0];
-          // const firstOption = response.data[0].options[0].name
+          var labels = data.options.map(function (option) {
+            return option.name;
+          });
+          var votes = data.options.map(function (option) {
+            return option.votes;
+          });
           _this2.setState({ chartData: {
-              labels: [data.options[0].name, data.options[1].name],
+              labels: labels,
               datasets: [{
-                data: [data.options[0].votes, data.options[1].votes],
-                backgroundColor: ['#FF6384', '#36A2EB'],
-                hoverBackgroundColor: ['#FF6384', '#36A2EB']
+                data: votes,
+                backgroundColor: _this2.randyColors
               }]
             }
           });
-          _this2.refs.canvas.chart_instance.update();
         }).catch(function (error) {
           console.error('axios error', error);
         });
@@ -103,15 +103,25 @@ var Details = function (_React$Component) {
 
       axios.get('/polls/' + this.props.params.userId + '/' + this.props.params.id).then(function (response) {
         var data = response.data[0];
+        console.log(data);
+        for (var i = 0; i < data.options.length; i += 1) {
+          _this3.randyColors.push('#' + (Math.random() * 0xFFFFFF << 0).toString(16));
+        }
+        console.log(_this3.randyColors);
+        var labels = data.options.map(function (option) {
+          return option.name;
+        });
+        var votes = data.options.map(function (option) {
+          return option.votes;
+        });
         var firstOption = data.options[0].name;
         _this3.value = firstOption;
-        _this3.setState({ pollData: response.data[0] });
+        _this3.setState({ pollData: data });
         _this3.setState({ chartData: {
-            labels: [data.options[0].name, data.options[1].name],
+            labels: labels,
             datasets: [{
-              data: [data.options[0].votes, data.options[1].votes],
-              backgroundColor: ['#FF6384', '#36A2EB'],
-              hoverBackgroundColor: ['#FF6384', '#36A2EB']
+              data: votes,
+              backgroundColor: _this3.randyColors
             }]
           }
         });

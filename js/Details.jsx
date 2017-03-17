@@ -11,6 +11,7 @@ const Doughnut = require('react-chartjs-2').Doughnut
 class Details extends React.Component {
   constructor (props) {
     super(props)
+
     this.state = {
       pollData: {
         name: '',
@@ -27,11 +28,7 @@ class Details extends React.Component {
         datasets: [{
           data: ['', ''],
           backgroundColor: [
-            '#FF6384',
-            '#36A2EB'
-          ],
-          hoverBackgroundColor: [
-            '#FF6384',
+            this.randyColor1,
             '#36A2EB'
           ]
         }]
@@ -40,6 +37,7 @@ class Details extends React.Component {
     this.value = ''
     this.handleChange = this.handleChange.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
+    this.randyColors = []
   }
 
   handleChange (event) {
@@ -50,42 +48,26 @@ class Details extends React.Component {
     const obj = _.find(this.state.pollData.options, {name: value})
     const name = obj.name
     const id = obj._id
-    // console.log(name)
-    // console.log(id)
     axios.post(`/poll-results/${this.props.params.userId}/${this.props.params.id}`, {
       name: name,
       _id: id
     })
     .then((response) => {
       axios.get(`/polls/${this.props.params.userId}/${this.props.params.id}`)
-      .then((response) => {
-        // console.log(response)
-        const data = response.data[0]
-        // const firstOption = response.data[0].options[0].name
-        this.setState({chartData:
-        {
-          labels: [
-            data.options[0].name,
-            data.options[1].name
-          ],
-          datasets: [{
-            data: [
-              data.options[0].votes,
-              data.options[1].votes
-            ],
-            backgroundColor: [
-              '#FF6384',
-              '#36A2EB'
-            ],
-            hoverBackgroundColor: [
-              '#FF6384',
-              '#36A2EB'
-            ]
-          }]
-        }
+        .then((response) => {
+          const data = response.data[0]
+          const labels = data.options.map(option => option.name)
+          const votes = data.options.map(option => option.votes)
+          this.setState({chartData:
+          {
+            labels: labels,
+            datasets: [{
+              data: votes,
+              backgroundColor: this.randyColors
+            }]
+          }
+          })
         })
-        this.refs.canvas.chart_instance.update()
-      })
       .catch((error) => {
         console.error('axios error', error)
       })
@@ -100,28 +82,22 @@ class Details extends React.Component {
     axios.get(`/polls/${this.props.params.userId}/${this.props.params.id}`)
       .then((response) => {
         const data = response.data[0]
+        console.log(data)
+        for (let i = 0; i < data.options.length; i += 1) {
+          this.randyColors.push('#' + (Math.random() * 0xFFFFFF << 0).toString(16))
+        }
+        console.log(this.randyColors)
+        const labels = data.options.map(option => option.name)
+        const votes = data.options.map(option => option.votes)
         const firstOption = data.options[0].name
         this.value = firstOption
-        this.setState({ pollData: response.data[0] })
+        this.setState({ pollData: data })
         this.setState({chartData:
         {
-          labels: [
-            data.options[0].name,
-            data.options[1].name
-          ],
+          labels: labels,
           datasets: [{
-            data: [
-              data.options[0].votes,
-              data.options[1].votes
-            ],
-            backgroundColor: [
-              '#FF6384',
-              '#36A2EB'
-            ],
-            hoverBackgroundColor: [
-              '#FF6384',
-              '#36A2EB'
-            ]
+            data: votes,
+            backgroundColor: this.randyColors
           }]
         }
         })

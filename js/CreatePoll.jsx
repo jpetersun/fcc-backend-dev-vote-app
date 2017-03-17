@@ -1,34 +1,73 @@
 const React = require('react')
+const axios = require('axios')
+const Router = require('react-router')
+// class Option extends React.Component {
+//   constructor (props) {
+//     super(props)
+
+//     this.handleDelete = this.handleDelete.bind(this)
+//     this.pollName = 'poll' + (Math.floor(Math.random() * 1000) + Math.floor(Math.random() * 1000))
+//     this.state = {
+//       name: this.pollName
+//     }
+//   }
+
+//   handleDelete (e) {
+//     console.log('delete option')
+//   }
+
+//   render () {
+//     return (
+//       <div>
+//         <label>Option: <input type='text' /></label>
+//         <button onClick={this.handleDelete}>Delete</button>
+//       </div>
+//     )
+//   }
+// }
 
 class CreatePoll extends React.Component {
   constructor (props) {
     super(props)
-    this.state = {value: ''}
+    this.state = {options: [], submitOptions: []}
 
-    this.handleChange = this.handleChange.bind(this)
-    this.handleAddOption = this.handleAddOption.bind(this)
+    this.renderOption = this.renderOption.bind(this)
+    this.handleSubmit = this.handleSubmit.bind(this)
   }
 
-  handleChange (event) {
-    this.setState({value: event.target.value})
+  renderOption () {
+    const randyKey = String((Math.floor(Math.random() * 1000) + Math.floor(Math.random() * 1000)))
+    const randyName = 'option' + randyKey
+    const optionState = this.state.options
+    optionState.push(<input required className='input__option' key={randyKey} data-value={this.state.value} name={randyName} type='text' />)
+    this.setState({options: optionState})
   }
 
-  handleAddOption (event) {
-    React.createElement(
-      'input',
-      []
-    )
+  handleSubmit () {
+    const inputs = Array.from(document.getElementsByClassName('input__option'))
+    console.log(inputs)
+    const values = inputs.map(input => input.value)
+    const name = document.getElementById('poll-name').value
+    axios.post('/create-poll', {
+      name,
+      values
+    })
+    .then((response) => {
+    })
+    .catch((error) => {
+      console.log(error)
+    })
   }
 
   render () {
     return (
-      <form method='post' action='/create-poll'>
+      <form onSubmit={this.handleSubmit} method='post' action='/create-poll'>
         <p>Create A Poll</p>
-        <button onClick={this.handleAddOption}>Add Option</button>
-        <label>Name: <input type='text' name='poll[name]' /></label>
-        <label>Option 1: <input type='text' name='poll[option1]' /></label>
-        <label>Option 2: <input type='text' name='poll[option2]' /></label>
-        <input type='submit' value='Submit' />
+        <label>Name: <input required type='text' id='poll-name' /></label>
+        <input required className='input__option' type='text' />
+        {this.state.options}
+        <button onClick={this.renderOption}>Add Option</button>
+        <input type='submit' />
       </form>
     )
   }
