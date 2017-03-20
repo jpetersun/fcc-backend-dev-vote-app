@@ -16,15 +16,15 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var React = __webpack_require__(5);
-var PollOption = __webpack_require__(433);
+var PollOption = __webpack_require__(440);
 var axios = __webpack_require__(257);
-var _ = __webpack_require__(436);
+var _ = __webpack_require__(443);
 
 if (typeof window === 'undefined') {
   global.window = {};
 }
 
-var Doughnut = __webpack_require__(437).Doughnut;
+var Doughnut = __webpack_require__(444).Doughnut;
 
 var Details = function (_React$Component) {
   _inherits(Details, _React$Component);
@@ -187,7 +187,7 @@ module.exports = Details;
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 //! moment.js
-//! version : 2.17.1
+//! version : 2.18.0
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
 //! license : MIT
 //! momentjs.com
@@ -230,6 +230,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             return false;
         }
         return true;
+    }
+
+    function isUndefined(input) {
+        return input === void 0;
     }
 
     function isNumber(input) {
@@ -289,7 +293,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             userInvalidated: false,
             iso: false,
             parsedDateParts: [],
-            meridiem: null
+            meridiem: null,
+            rfc2822: false,
+            weekdayMismatch: false
         };
     }
 
@@ -352,10 +358,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         return m;
     }
 
-    function isUndefined(input) {
-        return input === void 0;
-    }
-
     // Plugins that add properties should also add the key here (null value),
     // so we can properly clone ourselves.
     var momentProperties = hooks.momentProperties = [];
@@ -395,7 +397,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         }
 
         if (momentProperties.length > 0) {
-            for (i in momentProperties) {
+            for (i = 0; i < momentProperties.length; i++) {
                 prop = momentProperties[i];
                 val = from[prop];
                 if (!isUndefined(val)) {
@@ -530,8 +532,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         }
         this._config = config;
         // Lenient ordinal parsing accepts just a number in addition to
-        // number + (possibly) stuff coming from _ordinalParseLenient.
-        this._ordinalParseLenient = new RegExp(this._ordinalParse.source + '|' + /\d{1,2}/.source);
+        // number + (possibly) stuff coming from _dayOfMonthOrdinalParse.
+        // TODO: Remove "ordinalParse" fallback in next major release.
+        this._dayOfMonthOrdinalParseLenient = new RegExp((this._dayOfMonthOrdinalParse.source || this._ordinalParse.source) + '|' + /\d{1,2}/.source);
     }
 
     function mergeConfigs(parentConfig, childConfig) {
@@ -629,7 +632,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     }
 
     var defaultOrdinal = '%d';
-    var defaultOrdinalParse = /\d{1,2}/;
+    var defaultDayOfMonthOrdinalParse = /\d{1,2}/;
 
     function ordinal(number) {
         return this._ordinal.replace('%d', number);
@@ -639,6 +642,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         future: 'in %s',
         past: '%s ago',
         s: 'a few seconds',
+        ss: '%d seconds',
         m: 'a minute',
         mm: '%d minutes',
         h: 'an hour',
@@ -819,7 +823,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             var output = '',
                 i;
             for (i = 0; i < length; i++) {
-                output += array[i] instanceof Function ? array[i].call(mom, format) : array[i];
+                output += isFunction(array[i]) ? array[i].call(mom, format) : array[i];
             }
             return output;
         };
@@ -1022,7 +1026,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     var defaultLocaleMonths = 'January_February_March_April_May_June_July_August_September_October_November_December'.split('_');
     function localeMonths(m, format) {
         if (!m) {
-            return this._months;
+            return isArray(this._months) ? this._months : this._months['standalone'];
         }
         return isArray(this._months) ? this._months[m.month()] : this._months[(this._months.isFormat || MONTHS_IN_FORMAT).test(format) ? 'format' : 'standalone'][m.month()];
     }
@@ -1030,7 +1034,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     var defaultLocaleMonthsShort = 'Jan_Feb_Mar_Apr_May_Jun_Jul_Aug_Sep_Oct_Nov_Dec'.split('_');
     function localeMonthsShort(m, format) {
         if (!m) {
-            return this._monthsShort;
+            return isArray(this._monthsShort) ? this._monthsShort : this._monthsShort['standalone'];
         }
         return isArray(this._monthsShort) ? this._monthsShort[m.month()] : this._monthsShort[MONTHS_IN_FORMAT.test(format) ? 'format' : 'standalone'][m.month()];
     }
@@ -1300,11 +1304,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     }
 
     function createDate(y, m, d, h, M, s, ms) {
-        //can't just apply() to create a date:
-        //http://stackoverflow.com/questions/181348/instantiating-a-javascript-object-by-calling-prototype-constructor-apply
+        // can't just apply() to create a date:
+        // https://stackoverflow.com/q/181348
         var date = new Date(y, m, d, h, M, s, ms);
 
-        //the date constructor remaps years 0-99 to 1900-1999
+        // the date constructor remaps years 0-99 to 1900-1999
         if (y < 100 && y >= 0 && isFinite(date.getFullYear())) {
             date.setFullYear(y);
         }
@@ -1314,7 +1318,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     function createUTCDate(y) {
         var date = new Date(Date.UTC.apply(null, arguments));
 
-        //the Date.UTC function remaps years 0-99 to 1900-1999
+        // the Date.UTC function remaps years 0-99 to 1900-1999
         if (y < 100 && y >= 0 && isFinite(date.getUTCFullYear())) {
             date.setUTCFullYear(y);
         }
@@ -1332,7 +1336,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         return -fwdlw + fwd - 1;
     }
 
-    //http://en.wikipedia.org/wiki/ISO_week_date#Calculating_a_date_given_the_year.2C_week_number_and_weekday
+    // https://en.wikipedia.org/wiki/ISO_week_date#Calculating_a_date_given_the_year.2C_week_number_and_weekday
     function dayOfYearFromWeeks(year, week, weekday, dow, doy) {
         var localWeekday = (7 + weekday - dow) % 7,
             weekOffset = firstWeekOffset(year, dow, doy),
@@ -1535,7 +1539,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     var defaultLocaleWeekdays = 'Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday'.split('_');
     function localeWeekdays(m, format) {
         if (!m) {
-            return this._weekdays;
+            return isArray(this._weekdays) ? this._weekdays : this._weekdays['standalone'];
         }
         return isArray(this._weekdays) ? this._weekdays[m.day()] : this._weekdays[this._weekdays.isFormat.test(format) ? 'format' : 'standalone'][m.day()];
     }
@@ -1858,8 +1862,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     addRegexToken('A', matchMeridiem);
     addRegexToken('H', match1to2);
     addRegexToken('h', match1to2);
+    addRegexToken('k', match1to2);
     addRegexToken('HH', match1to2, match2);
     addRegexToken('hh', match1to2, match2);
+    addRegexToken('kk', match1to2, match2);
 
     addRegexToken('hmm', match3to4);
     addRegexToken('hmmss', match5to6);
@@ -1867,6 +1873,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     addRegexToken('Hmmss', match5to6);
 
     addParseToken(['H', 'HH'], HOUR);
+    addParseToken(['k', 'kk'], function (input, array, config) {
+        var kInput = toInt(input);
+        array[HOUR] = kInput === 24 ? 0 : kInput;
+    });
     addParseToken(['a', 'A'], function (input, array, config) {
         config._isPm = config._locale.isPM(input);
         config._meridiem = input;
@@ -1936,7 +1946,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         longDateFormat: defaultLongDateFormat,
         invalidDate: defaultInvalidDate,
         ordinal: defaultOrdinal,
-        ordinalParse: defaultOrdinalParse,
+        dayOfMonthOrdinalParse: defaultDayOfMonthOrdinalParse,
         relativeTime: defaultRelativeTime,
 
         months: defaultLocaleMonths,
@@ -1997,7 +2007,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         if (!locales[name] && typeof module !== 'undefined' && module && module.exports) {
             try {
                 oldLocale = globalLocale._abbr;
-                __webpack_require__(438)("./" + name);
+                __webpack_require__(445)("./" + name);
                 // because defineLocale currently also sets the global locale, we
                 // want to undo that for lazy loaded locales
                 getSetGlobalLocale(oldLocale);
@@ -2221,6 +2231,78 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         }
     }
 
+    // RFC 2822 regex: For details see https://tools.ietf.org/html/rfc2822#section-3.3
+    var basicRfcRegex = /^((?:Mon|Tue|Wed|Thu|Fri|Sat|Sun),?\s)?(\d?\d\s(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s(?:\d\d)?\d\d\s)(\d\d:\d\d)(\:\d\d)?(\s(?:UT|GMT|[ECMP][SD]T|[A-IK-Za-ik-z]|[+-]\d{4}))$/;
+
+    // date and time from ref 2822 format
+    function configFromRFC2822(config) {
+        var string, match, dayFormat, dateFormat, timeFormat, tzFormat;
+        var timezones = {
+            ' GMT': ' +0000',
+            ' EDT': ' -0400',
+            ' EST': ' -0500',
+            ' CDT': ' -0500',
+            ' CST': ' -0600',
+            ' MDT': ' -0600',
+            ' MST': ' -0700',
+            ' PDT': ' -0700',
+            ' PST': ' -0800'
+        };
+        var military = 'YXWVUTSRQPONZABCDEFGHIKLM';
+        var timezone, timezoneIndex;
+
+        string = config._i.replace(/\([^\)]*\)|[\n\t]/g, ' ') // Remove comments and folding whitespace
+        .replace(/(\s\s+)/g, ' ') // Replace multiple-spaces with a single space
+        .replace(/^\s|\s$/g, ''); // Remove leading and trailing spaces
+        match = basicRfcRegex.exec(string);
+
+        if (match) {
+            dayFormat = match[1] ? 'ddd' + (match[1].length === 5 ? ', ' : ' ') : '';
+            dateFormat = 'D MMM ' + (match[2].length > 10 ? 'YYYY ' : 'YY ');
+            timeFormat = 'HH:mm' + (match[4] ? ':ss' : '');
+
+            // TODO: Replace the vanilla JS Date object with an indepentent day-of-week check.
+            if (match[1]) {
+                // day of week given
+                var momentDate = new Date(match[2]);
+                var momentDay = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][momentDate.getDay()];
+
+                if (match[1].substr(0, 3) !== momentDay) {
+                    getParsingFlags(config).weekdayMismatch = true;
+                    config._isValid = false;
+                    return;
+                }
+            }
+
+            switch (match[5].length) {
+                case 2:
+                    // military
+                    if (timezoneIndex === 0) {
+                        timezone = ' +0000';
+                    } else {
+                        timezoneIndex = military.indexOf(match[5][1].toUpperCase()) - 12;
+                        timezone = (timezoneIndex < 0 ? ' -' : ' +') + ('' + timezoneIndex).replace(/^-?/, '0').match(/..$/)[0] + '00';
+                    }
+                    break;
+                case 4:
+                    // Zone
+                    timezone = timezones[match[5]];
+                    break;
+                default:
+                    // UT or +/-9999
+                    timezone = timezones[' GMT'];
+            }
+            match[5] = timezone;
+            config._i = match.splice(1).join('');
+            tzFormat = ' ZZ';
+            config._f = dayFormat + dateFormat + timeFormat + tzFormat;
+            configFromStringAndFormat(config);
+            getParsingFlags(config).rfc2822 = true;
+        } else {
+            config._isValid = false;
+        }
+    }
+
     // date from iso format or fallback
     function configFromString(config) {
         var matched = aspNetJsonRegex.exec(config._i);
@@ -2233,11 +2315,22 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         configFromISO(config);
         if (config._isValid === false) {
             delete config._isValid;
-            hooks.createFromInputFallback(config);
+        } else {
+            return;
         }
+
+        configFromRFC2822(config);
+        if (config._isValid === false) {
+            delete config._isValid;
+        } else {
+            return;
+        }
+
+        // Final attempt, use Input Fallback
+        hooks.createFromInputFallback(config);
     }
 
-    hooks.createFromInputFallback = deprecate('value provided is not in a recognized ISO format. moment construction falls back to js Date(), ' + 'which is not reliable across all browsers and versions. Non ISO date formats are ' + 'discouraged and will be removed in an upcoming major release. Please refer to ' + 'http://momentjs.com/guides/#/warnings/js-date/ for more info.', function (config) {
+    hooks.createFromInputFallback = deprecate('value provided is not in a recognized RFC2822 or ISO format. moment construction falls back to js Date(), ' + 'which is not reliable across all browsers and versions. Non RFC2822/ISO date formats are ' + 'discouraged and will be removed in an upcoming major release. Please refer to ' + 'http://momentjs.com/guides/#/warnings/js-date/ for more info.', function (config) {
         config._d = new Date(config._i + (config._useUTC ? ' UTC' : ''));
     });
 
@@ -2284,10 +2377,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         }
 
         //if the day of the year is set, figure out what it is
-        if (config._dayOfYear) {
+        if (config._dayOfYear != null) {
             yearToUse = defaults(config._a[YEAR], currentDate[YEAR]);
 
-            if (config._dayOfYear > daysInYear(yearToUse)) {
+            if (config._dayOfYear > daysInYear(yearToUse) || config._dayOfYear === 0) {
                 getParsingFlags(config)._overflowDayOfYear = true;
             }
 
@@ -2388,6 +2481,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     // constant that refers to the ISO standard
     hooks.ISO_8601 = function () {};
 
+    // constant that refers to the RFC 2822 form
+    hooks.RFC_2822 = function () {};
+
     // date from string and format string
     function configFromStringAndFormat(config) {
         // TODO: Move this to another part of the creation flow to prevent circular deps
@@ -2395,7 +2491,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             configFromISO(config);
             return;
         }
-
+        if (config._f === hooks.RFC_2822) {
+            configFromRFC2822(config);
+            return;
+        }
         config._a = [];
         getParsingFlags(config).empty = true;
 
@@ -2581,7 +2680,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     function configFromInput(config) {
         var input = config._i;
-        if (input === undefined) {
+        if (isUndefined(input)) {
             config._d = new Date(hooks.now());
         } else if (isDate(input)) {
             config._d = new Date(input.valueOf());
@@ -2592,7 +2691,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
                 return parseInt(obj, 10);
             });
             configFromArray(config);
-        } else if ((typeof input === 'undefined' ? 'undefined' : _typeof(input)) === 'object') {
+        } else if (isObject(input)) {
             configFromObject(config);
         } else if (isNumber(input)) {
             // from milliseconds
@@ -2686,6 +2785,38 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         return Date.now ? Date.now() : +new Date();
     };
 
+    var ordering = ['year', 'quarter', 'month', 'week', 'day', 'hour', 'minute', 'second', 'millisecond'];
+
+    function isDurationValid(m) {
+        for (var key in m) {
+            if (!(ordering.indexOf(key) !== -1 && (m[key] == null || !isNaN(m[key])))) {
+                return false;
+            }
+        }
+
+        var unitHasDecimal = false;
+        for (var i = 0; i < ordering.length; ++i) {
+            if (m[ordering[i]]) {
+                if (unitHasDecimal) {
+                    return false; // only allow non-integers for smallest unit
+                }
+                if (parseFloat(m[ordering[i]]) !== toInt(m[ordering[i]])) {
+                    unitHasDecimal = true;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    function isValid$1() {
+        return this._isValid;
+    }
+
+    function createInvalid$1() {
+        return createDuration(NaN);
+    }
+
     function Duration(duration) {
         var normalizedInput = normalizeObjectUnits(duration),
             years = normalizedInput.year || 0,
@@ -2697,6 +2828,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             minutes = normalizedInput.minute || 0,
             seconds = normalizedInput.second || 0,
             milliseconds = normalizedInput.millisecond || 0;
+
+        this._isValid = isDurationValid(normalizedInput);
 
         // representation for dateAddRemove
         this._milliseconds = +milliseconds + seconds * 1e3 + // 1000
@@ -2815,7 +2948,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     // a second time. In case it wants us to change the offset again
     // _changeInProgress == true case, then we have to adjust, because
     // there is no such time in the given timezone.
-    function getSetOffset(input, keepLocalTime) {
+    function getSetOffset(input, keepLocalTime, keepMinutes) {
         var offset = this._offset || 0,
             localAdjust;
         if (!this.isValid()) {
@@ -2827,7 +2960,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
                 if (input === null) {
                     return this;
                 }
-            } else if (Math.abs(input) < 16) {
+            } else if (Math.abs(input) < 16 && !keepMinutes) {
                 input = input * 60;
             }
             if (!this._isUTC && keepLocalTime) {
@@ -2885,7 +3018,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     function setOffsetToParsedOffset() {
         if (this._tzm != null) {
-            this.utcOffset(this._tzm);
+            this.utcOffset(this._tzm, false, true);
         } else if (typeof this._i === 'string') {
             var tZone = offsetFromString(matchOffset, this._i);
             if (tZone != null) {
@@ -3014,6 +3147,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     }
 
     createDuration.fn = Duration.prototype;
+    createDuration.invalid = createInvalid$1;
 
     function parseIso(inp, sign) {
         // We'd normally use ~~inp for this, but unfortunately it also
@@ -3243,17 +3377,18 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     }
 
     function toISOString() {
+        if (!this.isValid()) {
+            return null;
+        }
         var m = this.clone().utc();
-        if (0 < m.year() && m.year() <= 9999) {
-            if (isFunction(Date.prototype.toISOString)) {
-                // native implementation is ~50x faster, use it when we can
-                return this.toDate().toISOString();
-            } else {
-                return formatMoment(m, 'YYYY-MM-DD[T]HH:mm:ss.SSS[Z]');
-            }
-        } else {
+        if (m.year() < 0 || m.year() > 9999) {
             return formatMoment(m, 'YYYYYY-MM-DD[T]HH:mm:ss.SSS[Z]');
         }
+        if (isFunction(Date.prototype.toISOString)) {
+            // native implementation is ~50x faster, use it when we can
+            return this.toDate().toISOString();
+        }
+        return formatMoment(m, 'YYYY-MM-DD[T]HH:mm:ss.SSS[Z]');
     }
 
     /**
@@ -3273,7 +3408,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             zone = 'Z';
         }
         var prefix = '[' + func + '("]';
-        var year = 0 < this.year() && this.year() <= 9999 ? 'YYYY' : 'YYYYYY';
+        var year = 0 <= this.year() && this.year() <= 9999 ? 'YYYY' : 'YYYYYY';
         var datetime = '-MM-DD[T]HH:mm:ss.SSS';
         var suffix = zone + '[")]';
 
@@ -3434,7 +3569,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         return this.isValid() ? this.toISOString() : null;
     }
 
-    function isValid$1() {
+    function isValid$2() {
         return isValid(this);
     }
 
@@ -3587,7 +3722,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     addRegexToken('D', match1to2);
     addRegexToken('DD', match1to2, match2);
     addRegexToken('Do', function (isStrict, locale) {
-        return isStrict ? locale._ordinalParse : locale._ordinalParseLenient;
+        // TODO: Remove "ordinalParse" fallback in next major release.
+        return isStrict ? locale._dayOfMonthOrdinalParse || locale._ordinalParse : locale._dayOfMonthOrdinalParseLenient;
     });
 
     addParseToken(['D', 'DD'], DATE);
@@ -3766,7 +3902,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     proto.isSame = isSame;
     proto.isSameOrAfter = isSameOrAfter;
     proto.isSameOrBefore = isSameOrBefore;
-    proto.isValid = isValid$1;
+    proto.isValid = isValid$2;
     proto.lang = lang;
     proto.locale = locale;
     proto.localeData = localeData;
@@ -3991,7 +4127,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     }
 
     getSetGlobalLocale('en', {
-        ordinalParse: /\d{1,2}(th|st|nd|rd)/,
+        dayOfMonthOrdinalParse: /\d{1,2}(th|st|nd|rd)/,
         ordinal: function ordinal(number) {
             var b = number % 10,
                 output = toInt(number % 100 / 10) === 1 ? 'th' : b === 1 ? 'st' : b === 2 ? 'nd' : b === 3 ? 'rd' : 'th';
@@ -4108,6 +4244,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     }
 
     function as(units) {
+        if (!this.isValid()) {
+            return NaN;
+        }
         var days;
         var months;
         var milliseconds = this._milliseconds;
@@ -4143,6 +4282,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     // TODO: Use this.as('ms')?
     function valueOf$1() {
+        if (!this.isValid()) {
+            return NaN;
+        }
         return this._milliseconds + this._days * 864e5 + this._months % 12 * 2592e6 + toInt(this._months / 12) * 31536e6;
     }
 
@@ -4163,12 +4305,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     function get$2(units) {
         units = normalizeUnits(units);
-        return this[units + 's']();
+        return this.isValid() ? this[units + 's']() : NaN;
     }
 
     function makeGetter(name) {
         return function () {
-            return this._data[name];
+            return this.isValid() ? this._data[name] : NaN;
         };
     }
 
@@ -4186,6 +4328,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     var round = Math.round;
     var thresholds = {
+        ss: 44, // a few seconds to seconds
         s: 45, // seconds to minute
         m: 45, // minutes to hour
         h: 22, // hours to day
@@ -4207,7 +4350,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         var months = round(duration.as('M'));
         var years = round(duration.as('y'));
 
-        var a = seconds < thresholds.s && ['s', seconds] || minutes <= 1 && ['m'] || minutes < thresholds.m && ['mm', minutes] || hours <= 1 && ['h'] || hours < thresholds.h && ['hh', hours] || days <= 1 && ['d'] || days < thresholds.d && ['dd', days] || months <= 1 && ['M'] || months < thresholds.M && ['MM', months] || years <= 1 && ['y'] || ['yy', years];
+        var a = seconds <= thresholds.ss && ['s', seconds] || seconds < thresholds.s && ['ss', seconds] || minutes <= 1 && ['m'] || minutes < thresholds.m && ['mm', minutes] || hours <= 1 && ['h'] || hours < thresholds.h && ['hh', hours] || days <= 1 && ['d'] || days < thresholds.d && ['dd', days] || months <= 1 && ['M'] || months < thresholds.M && ['MM', months] || years <= 1 && ['y'] || ['yy', years];
 
         a[2] = withoutSuffix;
         a[3] = +posNegDuration > 0;
@@ -4236,10 +4379,17 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             return thresholds[threshold];
         }
         thresholds[threshold] = limit;
+        if (threshold === 's') {
+            thresholds.ss = limit - 1;
+        }
         return true;
     }
 
     function humanize(withSuffix) {
+        if (!this.isValid()) {
+            return this.localeData().invalidDate();
+        }
+
         var locale = this.localeData();
         var output = relativeTime$1(this, !withSuffix, locale);
 
@@ -4260,6 +4410,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         // This is because there is no context-free conversion between hours and days
         // (think of clock changes)
         // and also not between days and months (28-31 days per month)
+        if (!this.isValid()) {
+            return this.localeData().invalidDate();
+        }
+
         var seconds = abs$1(this._milliseconds) / 1000;
         var days = abs$1(this._days);
         var months = abs$1(this._months);
@@ -4295,6 +4449,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     var proto$2 = Duration.prototype;
 
+    proto$2.isValid = isValid$1;
     proto$2.abs = abs;
     proto$2.add = add$1;
     proto$2.subtract = subtract$1;
@@ -4350,7 +4505,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     // Side effect imports
 
 
-    hooks.version = '2.17.1';
+    hooks.version = '2.18.0';
 
     setHookCallback(createLocal);
 
@@ -5937,7 +6092,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: '\'n jaar',
             yy: '%d jaar'
         },
-        ordinalParse: /\d{1,2}(ste|de)/,
+        dayOfMonthOrdinalParse: /\d{1,2}(ste|de)/,
         ordinal: function ordinal(number) {
             return number + (number === 1 || number === 8 || number >= 20 ? 'ste' : 'de'); // Thanks to Joris Röling : https://github.com/jjupiter
         },
@@ -6020,6 +6175,74 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 /***/ }),
 /* 278 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+//! moment.js locale configuration
+//! locale : Arabic (Kuwait) [ar-kw]
+//! author : Nusret Parlak: https://github.com/nusretparlak
+
+;(function (global, factory) {
+    ( false ? 'undefined' : _typeof(exports)) === 'object' && typeof module !== 'undefined' && "function" === 'function' ? factory(__webpack_require__(249)) :  true ? !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(249)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)) : factory(global.moment);
+})(undefined, function (moment) {
+    'use strict';
+
+    var arKw = moment.defineLocale('ar-kw', {
+        months: 'يناير_فبراير_مارس_أبريل_ماي_يونيو_يوليوز_غشت_شتنبر_أكتوبر_نونبر_دجنبر'.split('_'),
+        monthsShort: 'يناير_فبراير_مارس_أبريل_ماي_يونيو_يوليوز_غشت_شتنبر_أكتوبر_نونبر_دجنبر'.split('_'),
+        weekdays: 'الأحد_الإتنين_الثلاثاء_الأربعاء_الخميس_الجمعة_السبت'.split('_'),
+        weekdaysShort: 'احد_اتنين_ثلاثاء_اربعاء_خميس_جمعة_سبت'.split('_'),
+        weekdaysMin: 'ح_ن_ث_ر_خ_ج_س'.split('_'),
+        weekdaysParseExact: true,
+        longDateFormat: {
+            LT: 'HH:mm',
+            LTS: 'HH:mm:ss',
+            L: 'DD/MM/YYYY',
+            LL: 'D MMMM YYYY',
+            LLL: 'D MMMM YYYY HH:mm',
+            LLLL: 'dddd D MMMM YYYY HH:mm'
+        },
+        calendar: {
+            sameDay: '[اليوم على الساعة] LT',
+            nextDay: '[غدا على الساعة] LT',
+            nextWeek: 'dddd [على الساعة] LT',
+            lastDay: '[أمس على الساعة] LT',
+            lastWeek: 'dddd [على الساعة] LT',
+            sameElse: 'L'
+        },
+        relativeTime: {
+            future: 'في %s',
+            past: 'منذ %s',
+            s: 'ثوان',
+            m: 'دقيقة',
+            mm: '%d دقائق',
+            h: 'ساعة',
+            hh: '%d ساعات',
+            d: 'يوم',
+            dd: '%d أيام',
+            M: 'شهر',
+            MM: '%d أشهر',
+            y: 'سنة',
+            yy: '%d سنوات'
+        },
+        week: {
+            dow: 0, // Sunday is the first day of the week.
+            doy: 12 // The week that contains Jan 1st is the first week of the year.
+        }
+    });
+
+    return arKw;
+});
+
+/***/ }),
+/* 279 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6141,7 +6364,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 279 */
+/* 280 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6210,7 +6433,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 280 */
+/* 281 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6324,7 +6547,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 281 */
+/* 282 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6392,7 +6615,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 282 */
+/* 283 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6530,7 +6753,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 283 */
+/* 284 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6625,7 +6848,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
                 return 'axşam';
             }
         },
-        ordinalParse: /\d{1,2}-(ıncı|inci|nci|üncü|ncı|uncu)/,
+        dayOfMonthOrdinalParse: /\d{1,2}-(ıncı|inci|nci|üncü|ncı|uncu)/,
         ordinal: function ordinal(number) {
             if (number === 0) {
                 // special case for zero
@@ -6646,7 +6869,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 284 */
+/* 285 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6763,7 +6986,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
                 return 'вечара';
             }
         },
-        ordinalParse: /\d{1,2}-(і|ы|га)/,
+        dayOfMonthOrdinalParse: /\d{1,2}-(і|ы|га)/,
         ordinal: function ordinal(number, period) {
             switch (period) {
                 case 'M':
@@ -6788,7 +7011,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 285 */
+/* 286 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6857,7 +7080,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'година',
             yy: '%d години'
         },
-        ordinalParse: /\d{1,2}-(ев|ен|ти|ви|ри|ми)/,
+        dayOfMonthOrdinalParse: /\d{1,2}-(ев|ен|ти|ви|ри|ми)/,
         ordinal: function ordinal(number) {
             var lastDigit = number % 10,
                 last2Digits = number % 100;
@@ -6887,7 +7110,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 286 */
+/* 287 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7013,7 +7236,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 287 */
+/* 288 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7139,7 +7362,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 288 */
+/* 289 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7241,7 +7464,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'ur bloaz',
             yy: specialMutationForYears
         },
-        ordinalParse: /\d{1,2}(añ|vet)/,
+        dayOfMonthOrdinalParse: /\d{1,2}(añ|vet)/,
         ordinal: function ordinal(number) {
             var output = number === 1 ? 'añ' : 'vet';
             return number + output;
@@ -7256,7 +7479,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 289 */
+/* 290 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7396,7 +7619,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'godinu',
             yy: translate
         },
-        ordinalParse: /\d{1,2}\./,
+        dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -7408,7 +7631,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 290 */
+/* 291 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7429,8 +7652,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     'use strict';
 
     var ca = moment.defineLocale('ca', {
-        months: 'gener_febrer_març_abril_maig_juny_juliol_agost_setembre_octubre_novembre_desembre'.split('_'),
-        monthsShort: 'gen._febr._mar._abr._mai._jun._jul._ag._set._oct._nov._des.'.split('_'),
+        months: {
+            standalone: 'gener_febrer_març_abril_maig_juny_juliol_agost_setembre_octubre_novembre_desembre'.split('_'),
+            format: 'de gener_de febrer_de març_d\'abril_de maig_de juny_de juliol_d\'agost_de setembre_d\'octubre_de novembre_de desembre'.split('_'),
+            isFormat: /D[oD]?(\s)+MMMM/
+        },
+        monthsShort: 'gen._febr._març_abr._maig_juny_jul._ag._set._oct._nov._des.'.split('_'),
         monthsParseExact: true,
         weekdays: 'diumenge_dilluns_dimarts_dimecres_dijous_divendres_dissabte'.split('_'),
         weekdaysShort: 'dg._dl._dt._dc._dj._dv._ds.'.split('_'),
@@ -7440,9 +7667,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             LT: 'H:mm',
             LTS: 'H:mm:ss',
             L: 'DD/MM/YYYY',
-            LL: 'D MMMM YYYY',
-            LLL: 'D MMMM YYYY H:mm',
-            LLLL: 'dddd D MMMM YYYY H:mm'
+            LL: '[el] D MMMM [de] YYYY',
+            ll: 'D MMM YYYY',
+            LLL: '[el] D MMMM [de] YYYY [a les] H:mm',
+            lll: 'D MMM YYYY, H:mm',
+            LLLL: '[el] dddd D MMMM [de] YYYY [a les] H:mm',
+            llll: 'ddd D MMM YYYY, H:mm'
         },
         calendar: {
             sameDay: function sameDay() {
@@ -7477,7 +7707,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'un any',
             yy: '%d anys'
         },
-        ordinalParse: /\d{1,2}(r|n|t|è|a)/,
+        dayOfMonthOrdinalParse: /\d{1,2}(r|n|t|è|a)/,
         ordinal: function ordinal(number, period) {
             var output = number === 1 ? 'r' : number === 2 ? 'n' : number === 3 ? 'r' : number === 4 ? 't' : 'è';
             if (period === 'w' || period === 'W') {
@@ -7495,7 +7725,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 291 */
+/* 292 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7678,7 +7908,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: translate,
             yy: translate
         },
-        ordinalParse: /\d{1,2}\./,
+        dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -7690,7 +7920,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 292 */
+/* 293 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7750,7 +7980,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'пӗр ҫул',
             yy: '%d ҫул'
         },
-        ordinalParse: /\d{1,2}-мӗш/,
+        dayOfMonthOrdinalParse: /\d{1,2}-мӗш/,
         ordinal: '%d-мӗш',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -7762,7 +7992,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 293 */
+/* 294 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7822,7 +8052,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'blwyddyn',
             yy: '%d flynedd'
         },
-        ordinalParse: /\d{1,2}(fed|ain|af|il|ydd|ed|eg)/,
+        dayOfMonthOrdinalParse: /\d{1,2}(fed|ain|af|il|ydd|ed|eg)/,
         // traditional ordinal numbers above 31 are not commonly used in colloquial Welsh
         ordinal: function ordinal(number) {
             var b = number,
@@ -7851,7 +8081,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 294 */
+/* 295 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7883,14 +8113,14 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             L: 'DD/MM/YYYY',
             LL: 'D. MMMM YYYY',
             LLL: 'D. MMMM YYYY HH:mm',
-            LLLL: 'dddd [d.] D. MMMM YYYY HH:mm'
+            LLLL: 'dddd [d.] D. MMMM YYYY [kl.] HH:mm'
         },
         calendar: {
-            sameDay: '[I dag kl.] LT',
-            nextDay: '[I morgen kl.] LT',
-            nextWeek: 'dddd [kl.] LT',
-            lastDay: '[I går kl.] LT',
-            lastWeek: '[sidste] dddd [kl] LT',
+            sameDay: '[i dag kl.] LT',
+            nextDay: '[i morgen kl.] LT',
+            nextWeek: 'på dddd [kl.] LT',
+            lastDay: '[i går kl.] LT',
+            lastWeek: '[i] dddd[s kl.] LT',
             sameElse: 'L'
         },
         relativeTime: {
@@ -7908,7 +8138,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'et år',
             yy: '%d år'
         },
-        ordinalParse: /\d{1,2}\./,
+        dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -7920,7 +8150,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 295 */
+/* 296 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7996,7 +8226,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: processRelativeTime,
             yy: processRelativeTime
         },
-        ordinalParse: /\d{1,2}\./,
+        dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -8008,7 +8238,94 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 296 */
+/* 297 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+//! moment.js locale configuration
+//! locale : German (Switzerland) [de-ch]
+//! author : sschueller : https://github.com/sschueller
+
+;(function (global, factory) {
+    ( false ? 'undefined' : _typeof(exports)) === 'object' && typeof module !== 'undefined' && "function" === 'function' ? factory(__webpack_require__(249)) :  true ? !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(249)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)) : factory(global.moment);
+})(undefined, function (moment) {
+    'use strict';
+
+    // based on: https://www.bk.admin.ch/dokumentation/sprachen/04915/05016/index.html?lang=de#
+
+    function processRelativeTime(number, withoutSuffix, key, isFuture) {
+        var format = {
+            'm': ['eine Minute', 'einer Minute'],
+            'h': ['eine Stunde', 'einer Stunde'],
+            'd': ['ein Tag', 'einem Tag'],
+            'dd': [number + ' Tage', number + ' Tagen'],
+            'M': ['ein Monat', 'einem Monat'],
+            'MM': [number + ' Monate', number + ' Monaten'],
+            'y': ['ein Jahr', 'einem Jahr'],
+            'yy': [number + ' Jahre', number + ' Jahren']
+        };
+        return withoutSuffix ? format[key][0] : format[key][1];
+    }
+
+    var deCh = moment.defineLocale('de-ch', {
+        months: 'Januar_Februar_März_April_Mai_Juni_Juli_August_September_Oktober_November_Dezember'.split('_'),
+        monthsShort: 'Jan._Febr._März_April_Mai_Juni_Juli_Aug._Sept._Okt._Nov._Dez.'.split('_'),
+        monthsParseExact: true,
+        weekdays: 'Sonntag_Montag_Dienstag_Mittwoch_Donnerstag_Freitag_Samstag'.split('_'),
+        weekdaysShort: 'So_Mo_Di_Mi_Do_Fr_Sa'.split('_'),
+        weekdaysMin: 'So_Mo_Di_Mi_Do_Fr_Sa'.split('_'),
+        weekdaysParseExact: true,
+        longDateFormat: {
+            LT: 'HH.mm',
+            LTS: 'HH.mm.ss',
+            L: 'DD.MM.YYYY',
+            LL: 'D. MMMM YYYY',
+            LLL: 'D. MMMM YYYY HH.mm',
+            LLLL: 'dddd, D. MMMM YYYY HH.mm'
+        },
+        calendar: {
+            sameDay: '[heute um] LT [Uhr]',
+            sameElse: 'L',
+            nextDay: '[morgen um] LT [Uhr]',
+            nextWeek: 'dddd [um] LT [Uhr]',
+            lastDay: '[gestern um] LT [Uhr]',
+            lastWeek: '[letzten] dddd [um] LT [Uhr]'
+        },
+        relativeTime: {
+            future: 'in %s',
+            past: 'vor %s',
+            s: 'ein paar Sekunden',
+            m: processRelativeTime,
+            mm: '%d Minuten',
+            h: processRelativeTime,
+            hh: '%d Stunden',
+            d: processRelativeTime,
+            dd: processRelativeTime,
+            M: processRelativeTime,
+            MM: processRelativeTime,
+            y: processRelativeTime,
+            yy: processRelativeTime
+        },
+        dayOfMonthOrdinalParse: /\d{1,2}\./,
+        ordinal: '%d.',
+        week: {
+            dow: 1, // Monday is the first day of the week.
+            doy: 4 // The week that contains Jan 4th is the first week of the year.
+        }
+    });
+
+    return deCh;
+});
+
+/***/ }),
+/* 298 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8083,7 +8400,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: processRelativeTime,
             yy: processRelativeTime
         },
-        ordinalParse: /\d{1,2}\./,
+        dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -8095,7 +8412,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 297 */
+/* 299 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8183,7 +8500,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 298 */
+/* 300 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8211,7 +8528,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         monthsNominativeEl: 'Ιανουάριος_Φεβρουάριος_Μάρτιος_Απρίλιος_Μάιος_Ιούνιος_Ιούλιος_Αύγουστος_Σεπτέμβριος_Οκτώβριος_Νοέμβριος_Δεκέμβριος'.split('_'),
         monthsGenitiveEl: 'Ιανουαρίου_Φεβρουαρίου_Μαρτίου_Απριλίου_Μαΐου_Ιουνίου_Ιουλίου_Αυγούστου_Σεπτεμβρίου_Οκτωβρίου_Νοεμβρίου_Δεκεμβρίου'.split('_'),
         months: function months(momentToFormat, format) {
-            if (/D/.test(format.substring(0, format.indexOf('MMMM')))) {
+            if (!momentToFormat) {
+                return this._monthsNominativeEl;
+            } else if (/D/.test(format.substring(0, format.indexOf('MMMM')))) {
                 // if there is a day number before 'MMMM'
                 return this._monthsGenitiveEl[momentToFormat.month()];
             } else {
@@ -8279,7 +8598,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'ένας χρόνος',
             yy: '%d χρόνια'
         },
-        ordinalParse: /\d{1,2}η/,
+        dayOfMonthOrdinalParse: /\d{1,2}η/,
         ordinal: '%dη',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -8291,7 +8610,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 299 */
+/* 301 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8348,7 +8667,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'a year',
             yy: '%d years'
         },
-        ordinalParse: /\d{1,2}(st|nd|rd|th)/,
+        dayOfMonthOrdinalParse: /\d{1,2}(st|nd|rd|th)/,
         ordinal: function ordinal(number) {
             var b = number % 10,
                 output = ~~(number % 100 / 10) === 1 ? 'th' : b === 1 ? 'st' : b === 2 ? 'nd' : b === 3 ? 'rd' : 'th';
@@ -8364,7 +8683,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 300 */
+/* 302 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8421,7 +8740,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'a year',
             yy: '%d years'
         },
-        ordinalParse: /\d{1,2}(st|nd|rd|th)/,
+        dayOfMonthOrdinalParse: /\d{1,2}(st|nd|rd|th)/,
         ordinal: function ordinal(number) {
             var b = number % 10,
                 output = ~~(number % 100 / 10) === 1 ? 'th' : b === 1 ? 'st' : b === 2 ? 'nd' : b === 3 ? 'rd' : 'th';
@@ -8433,7 +8752,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 301 */
+/* 303 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8490,7 +8809,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'a year',
             yy: '%d years'
         },
-        ordinalParse: /\d{1,2}(st|nd|rd|th)/,
+        dayOfMonthOrdinalParse: /\d{1,2}(st|nd|rd|th)/,
         ordinal: function ordinal(number) {
             var b = number % 10,
                 output = ~~(number % 100 / 10) === 1 ? 'th' : b === 1 ? 'st' : b === 2 ? 'nd' : b === 3 ? 'rd' : 'th';
@@ -8506,7 +8825,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 302 */
+/* 304 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8563,7 +8882,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'a year',
             yy: '%d years'
         },
-        ordinalParse: /\d{1,2}(st|nd|rd|th)/,
+        dayOfMonthOrdinalParse: /\d{1,2}(st|nd|rd|th)/,
         ordinal: function ordinal(number) {
             var b = number % 10,
                 output = ~~(number % 100 / 10) === 1 ? 'th' : b === 1 ? 'st' : b === 2 ? 'nd' : b === 3 ? 'rd' : 'th';
@@ -8579,7 +8898,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 303 */
+/* 305 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8636,7 +8955,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'a year',
             yy: '%d years'
         },
-        ordinalParse: /\d{1,2}(st|nd|rd|th)/,
+        dayOfMonthOrdinalParse: /\d{1,2}(st|nd|rd|th)/,
         ordinal: function ordinal(number) {
             var b = number % 10,
                 output = ~~(number % 100 / 10) === 1 ? 'th' : b === 1 ? 'st' : b === 2 ? 'nd' : b === 3 ? 'rd' : 'th';
@@ -8652,7 +8971,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 304 */
+/* 306 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8663,8 +8982,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 //! moment.js locale configuration
 //! locale : Esperanto [eo]
 //! author : Colin Dean : https://github.com/colindean
-//! komento: Mi estas malcerta se mi korekte traktis akuzativojn en tiu traduko.
-//!          Se ne, bonvolu korekti kaj avizi min por ke mi povas lerni!
+//! author : Mia Nordentoft Imperatori : https://github.com/miestasmia
+//! comment : miestasmia corrected the translation by colindean
 
 ;(function (global, factory) {
     ( false ? 'undefined' : _typeof(exports)) === 'object' && typeof module !== 'undefined' && "function" === 'function' ? factory(__webpack_require__(249)) :  true ? !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(249)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
@@ -8677,16 +8996,16 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     var eo = moment.defineLocale('eo', {
         months: 'januaro_februaro_marto_aprilo_majo_junio_julio_aŭgusto_septembro_oktobro_novembro_decembro'.split('_'),
         monthsShort: 'jan_feb_mar_apr_maj_jun_jul_aŭg_sep_okt_nov_dec'.split('_'),
-        weekdays: 'Dimanĉo_Lundo_Mardo_Merkredo_Ĵaŭdo_Vendredo_Sabato'.split('_'),
-        weekdaysShort: 'Dim_Lun_Mard_Merk_Ĵaŭ_Ven_Sab'.split('_'),
-        weekdaysMin: 'Di_Lu_Ma_Me_Ĵa_Ve_Sa'.split('_'),
+        weekdays: 'dimanĉo_lundo_mardo_merkredo_ĵaŭdo_vendredo_sabato'.split('_'),
+        weekdaysShort: 'dim_lun_mard_merk_ĵaŭ_ven_sab'.split('_'),
+        weekdaysMin: 'di_lu_ma_me_ĵa_ve_sa'.split('_'),
         longDateFormat: {
             LT: 'HH:mm',
             LTS: 'HH:mm:ss',
             L: 'YYYY-MM-DD',
-            LL: 'D[-an de] MMMM, YYYY',
-            LLL: 'D[-an de] MMMM, YYYY HH:mm',
-            LLLL: 'dddd, [la] D[-an de] MMMM, YYYY HH:mm'
+            LL: 'D[-a de] MMMM, YYYY',
+            LLL: 'D[-a de] MMMM, YYYY HH:mm',
+            LLLL: 'dddd, [la] D[-a de] MMMM, YYYY HH:mm'
         },
         meridiemParse: /[ap]\.t\.m/i,
         isPM: function isPM(input) {
@@ -8708,7 +9027,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             sameElse: 'L'
         },
         relativeTime: {
-            future: 'je %s',
+            future: 'post %s',
             past: 'antaŭ %s',
             s: 'sekundoj',
             m: 'minuto',
@@ -8722,7 +9041,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'jaro',
             yy: '%d jaroj'
         },
-        ordinalParse: /\d{1,2}a/,
+        dayOfMonthOrdinalParse: /\d{1,2}a/,
         ordinal: '%da',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -8734,7 +9053,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 305 */
+/* 307 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8759,7 +9078,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     var esDo = moment.defineLocale('es-do', {
         months: 'enero_febrero_marzo_abril_mayo_junio_julio_agosto_septiembre_octubre_noviembre_diciembre'.split('_'),
         monthsShort: function monthsShort(m, format) {
-            if (/-MMM-/.test(format)) {
+            if (!m) {
+                return monthsShortDot;
+            } else if (/-MMM-/.test(format)) {
                 return _monthsShort[m.month()];
             } else {
                 return monthsShortDot[m.month()];
@@ -8811,7 +9132,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'un año',
             yy: '%d años'
         },
-        ordinalParse: /\d{1,2}º/,
+        dayOfMonthOrdinalParse: /\d{1,2}º/,
         ordinal: '%dº',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -8823,7 +9144,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 306 */
+/* 308 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8849,7 +9170,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     var es = moment.defineLocale('es', {
         months: 'enero_febrero_marzo_abril_mayo_junio_julio_agosto_septiembre_octubre_noviembre_diciembre'.split('_'),
         monthsShort: function monthsShort(m, format) {
-            if (/-MMM-/.test(format)) {
+            if (!m) {
+                return monthsShortDot;
+            } else if (/-MMM-/.test(format)) {
                 return _monthsShort[m.month()];
             } else {
                 return monthsShortDot[m.month()];
@@ -8901,7 +9224,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'un año',
             yy: '%d años'
         },
-        ordinalParse: /\d{1,2}º/,
+        dayOfMonthOrdinalParse: /\d{1,2}º/,
         ordinal: '%dº',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -8913,7 +9236,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 307 */
+/* 309 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8990,7 +9313,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: processRelativeTime,
             yy: processRelativeTime
         },
-        ordinalParse: /\d{1,2}\./,
+        dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -9002,7 +9325,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 308 */
+/* 310 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9065,7 +9388,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'urte bat',
             yy: '%d urte'
         },
-        ordinalParse: /\d{1,2}\./,
+        dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -9077,7 +9400,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 309 */
+/* 311 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9160,7 +9483,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         relativeTime: {
             future: 'در %s',
             past: '%s پیش',
-            s: 'چندین ثانیه',
+            s: 'چند ثانیه',
             m: 'یک دقیقه',
             mm: '%d دقیقه',
             h: 'یک ساعت',
@@ -9182,7 +9505,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
                 return symbolMap[match];
             }).replace(/,/g, '،');
         },
-        ordinalParse: /\d{1,2}م/,
+        dayOfMonthOrdinalParse: /\d{1,2}م/,
         ordinal: '%dم',
         week: {
             dow: 6, // Saturday is the first day of the week.
@@ -9194,7 +9517,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 310 */
+/* 312 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9295,7 +9618,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: translate,
             yy: translate
         },
-        ordinalParse: /\d{1,2}\./,
+        dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -9307,7 +9630,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 311 */
+/* 313 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9364,7 +9687,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'eitt ár',
             yy: '%d ár'
         },
-        ordinalParse: /\d{1,2}\./,
+        dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -9376,7 +9699,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 312 */
+/* 314 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9413,7 +9736,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             LLLL: 'dddd D MMMM YYYY HH:mm'
         },
         calendar: {
-            sameDay: '[Aujourd\'hui à] LT',
+            sameDay: '[Aujourd’hui à] LT',
             nextDay: '[Demain à] LT',
             nextWeek: 'dddd [à] LT',
             lastDay: '[Hier à] LT',
@@ -9435,9 +9758,23 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'un an',
             yy: '%d ans'
         },
-        ordinalParse: /\d{1,2}(er|e)/,
-        ordinal: function ordinal(number) {
-            return number + (number === 1 ? 'er' : 'e');
+        dayOfMonthOrdinalParse: /\d{1,2}(er|e)/,
+        ordinal: function ordinal(number, period) {
+            switch (period) {
+                // Words with masculine grammatical gender: mois, trimestre, jour
+                default:
+                case 'M':
+                case 'Q':
+                case 'D':
+                case 'DDD':
+                case 'd':
+                    return number + (number === 1 ? 'er' : 'e');
+
+                // Words with feminine grammatical gender: semaine
+                case 'w':
+                case 'W':
+                    return number + (number === 1 ? 're' : 'e');
+            }
         }
     });
 
@@ -9445,7 +9782,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 313 */
+/* 315 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9482,7 +9819,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             LLLL: 'dddd D MMMM YYYY HH:mm'
         },
         calendar: {
-            sameDay: '[Aujourd\'hui à] LT',
+            sameDay: '[Aujourd’hui à] LT',
             nextDay: '[Demain à] LT',
             nextWeek: 'dddd [à] LT',
             lastDay: '[Hier à] LT',
@@ -9504,9 +9841,23 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'un an',
             yy: '%d ans'
         },
-        ordinalParse: /\d{1,2}(er|e)/,
-        ordinal: function ordinal(number) {
-            return number + (number === 1 ? 'er' : 'e');
+        dayOfMonthOrdinalParse: /\d{1,2}(er|e)/,
+        ordinal: function ordinal(number, period) {
+            switch (period) {
+                // Words with masculine grammatical gender: mois, trimestre, jour
+                default:
+                case 'M':
+                case 'Q':
+                case 'D':
+                case 'DDD':
+                case 'd':
+                    return number + (number === 1 ? 'er' : 'e');
+
+                // Words with feminine grammatical gender: semaine
+                case 'w':
+                case 'W':
+                    return number + (number === 1 ? 're' : 'e');
+            }
         },
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -9518,7 +9869,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 314 */
+/* 316 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9555,7 +9906,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             LLLL: 'dddd D MMMM YYYY HH:mm'
         },
         calendar: {
-            sameDay: '[Aujourd\'hui à] LT',
+            sameDay: '[Aujourd’hui à] LT',
             nextDay: '[Demain à] LT',
             nextWeek: 'dddd [à] LT',
             lastDay: '[Hier à] LT',
@@ -9577,9 +9928,28 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'un an',
             yy: '%d ans'
         },
-        ordinalParse: /\d{1,2}(er|)/,
-        ordinal: function ordinal(number) {
-            return number + (number === 1 ? 'er' : '');
+        dayOfMonthOrdinalParse: /\d{1,2}(er|)/,
+        ordinal: function ordinal(number, period) {
+            switch (period) {
+                // TODO: Return 'e' when day of month > 1. Move this case inside
+                // block for masculine words below.
+                // See https://github.com/moment/moment/issues/3375
+                case 'D':
+                    return number + (number === 1 ? 'er' : '');
+
+                // Words with masculine grammatical gender: mois, trimestre, jour
+                default:
+                case 'M':
+                case 'Q':
+                case 'DDD':
+                case 'd':
+                    return number + (number === 1 ? 'er' : 'e');
+
+                // Words with feminine grammatical gender: semaine
+                case 'w':
+                case 'W':
+                    return number + (number === 1 ? 're' : 'e');
+            }
         },
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -9591,7 +9961,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 315 */
+/* 317 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9617,7 +9987,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     var fy = moment.defineLocale('fy', {
         months: 'jannewaris_febrewaris_maart_april_maaie_juny_july_augustus_septimber_oktober_novimber_desimber'.split('_'),
         monthsShort: function monthsShort(m, format) {
-            if (/-MMM-/.test(format)) {
+            if (!m) {
+                return monthsShortWithDots;
+            } else if (/-MMM-/.test(format)) {
                 return monthsShortWithoutDots[m.month()];
             } else {
                 return monthsShortWithDots[m.month()];
@@ -9659,7 +10031,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'ien jier',
             yy: '%d jierren'
         },
-        ordinalParse: /\d{1,2}(ste|de)/,
+        dayOfMonthOrdinalParse: /\d{1,2}(ste|de)/,
         ordinal: function ordinal(number) {
             return number + (number === 1 || number === 8 || number >= 20 ? 'ste' : 'de');
         },
@@ -9673,7 +10045,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 316 */
+/* 318 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9741,7 +10113,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'bliadhna',
             yy: '%d bliadhna'
         },
-        ordinalParse: /\d{1,2}(d|na|mh)/,
+        dayOfMonthOrdinalParse: /\d{1,2}(d|na|mh)/,
         ordinal: function ordinal(number) {
             var output = number === 1 ? 'd' : number % 10 === 2 ? 'na' : 'mh';
             return number + output;
@@ -9756,7 +10128,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 317 */
+/* 319 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9830,7 +10202,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'un ano',
             yy: '%d anos'
         },
-        ordinalParse: /\d{1,2}º/,
+        dayOfMonthOrdinalParse: /\d{1,2}º/,
         ordinal: '%dº',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -9842,7 +10214,138 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 318 */
+/* 320 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+//! moment.js locale configuration
+//! locale : Konkani Latin script [gom-latn]
+//! author : The Discoverer : https://github.com/WikiDiscoverer
+
+;(function (global, factory) {
+    ( false ? 'undefined' : _typeof(exports)) === 'object' && typeof module !== 'undefined' && "function" === 'function' ? factory(__webpack_require__(249)) :  true ? !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(249)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)) : factory(global.moment);
+})(undefined, function (moment) {
+    'use strict';
+
+    function processRelativeTime(number, withoutSuffix, key, isFuture) {
+        var format = {
+            's': ['thodde secondanim', 'thodde second'],
+            'm': ['eka mintan', 'ek minute'],
+            'mm': [number + ' mintanim', number + ' mintam'],
+            'h': ['eka horan', 'ek hor'],
+            'hh': [number + ' horanim', number + ' hor'],
+            'd': ['eka disan', 'ek dis'],
+            'dd': [number + ' disanim', number + ' dis'],
+            'M': ['eka mhoinean', 'ek mhoino'],
+            'MM': [number + ' mhoineanim', number + ' mhoine'],
+            'y': ['eka vorsan', 'ek voros'],
+            'yy': [number + ' vorsanim', number + ' vorsam']
+        };
+        return withoutSuffix ? format[key][0] : format[key][1];
+    }
+
+    var gomLatn = moment.defineLocale('gom-latn', {
+        months: 'Janer_Febrer_Mars_Abril_Mai_Jun_Julai_Agost_Setembr_Otubr_Novembr_Dezembr'.split('_'),
+        monthsShort: 'Jan._Feb._Mars_Abr._Mai_Jun_Jul._Ago._Set._Otu._Nov._Dez.'.split('_'),
+        monthsParseExact: true,
+        weekdays: 'Aitar_Somar_Mongllar_Budvar_Brestar_Sukrar_Son\'var'.split('_'),
+        weekdaysShort: 'Ait._Som._Mon._Bud._Bre._Suk._Son.'.split('_'),
+        weekdaysMin: 'Ai_Sm_Mo_Bu_Br_Su_Sn'.split('_'),
+        weekdaysParseExact: true,
+        longDateFormat: {
+            LT: 'A h:mm [vazta]',
+            LTS: 'A h:mm:ss [vazta]',
+            L: 'DD-MM-YYYY',
+            LL: 'D MMMM YYYY',
+            LLL: 'D MMMM YYYY A h:mm [vazta]',
+            LLLL: 'dddd, MMMM[achea] Do, YYYY, A h:mm [vazta]',
+            llll: 'ddd, D MMM YYYY, A h:mm [vazta]'
+        },
+        calendar: {
+            sameDay: '[Aiz] LT',
+            nextDay: '[Faleam] LT',
+            nextWeek: '[Ieta to] dddd[,] LT',
+            lastDay: '[Kal] LT',
+            lastWeek: '[Fatlo] dddd[,] LT',
+            sameElse: 'L'
+        },
+        relativeTime: {
+            future: '%s',
+            past: '%s adim',
+            s: processRelativeTime,
+            m: processRelativeTime,
+            mm: processRelativeTime,
+            h: processRelativeTime,
+            hh: processRelativeTime,
+            d: processRelativeTime,
+            dd: processRelativeTime,
+            M: processRelativeTime,
+            MM: processRelativeTime,
+            y: processRelativeTime,
+            yy: processRelativeTime
+        },
+        dayOfMonthOrdinalParse: /\d{1,2}(er)/,
+        ordinal: function ordinal(number, period) {
+            switch (period) {
+                // the ordinal 'er' only applies to day of the month
+                case 'D':
+                    return number + 'er';
+                default:
+                case 'M':
+                case 'Q':
+                case 'DDD':
+                case 'd':
+                case 'w':
+                case 'W':
+                    return number;
+            }
+        },
+        week: {
+            dow: 1, // Monday is the first day of the week.
+            doy: 4 // The week that contains Jan 4th is the first week of the year.
+        },
+        meridiemParse: /rati|sokalli|donparam|sanje/,
+        meridiemHour: function meridiemHour(hour, meridiem) {
+            if (hour === 12) {
+                hour = 0;
+            }
+            if (meridiem === 'rati') {
+                return hour < 4 ? hour : hour + 12;
+            } else if (meridiem === 'sokalli') {
+                return hour;
+            } else if (meridiem === 'donparam') {
+                return hour > 12 ? hour : hour + 12;
+            } else if (meridiem === 'sanje') {
+                return hour + 12;
+            }
+        },
+        meridiem: function meridiem(hour, minute, isLower) {
+            if (hour < 4) {
+                return 'rati';
+            } else if (hour < 12) {
+                return 'sokalli';
+            } else if (hour < 16) {
+                return 'donparam';
+            } else if (hour < 20) {
+                return 'sanje';
+            } else {
+                return 'rati';
+            }
+        }
+    });
+
+    return gomLatn;
+});
+
+/***/ }),
+/* 321 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9951,7 +10454,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 319 */
+/* 322 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10084,7 +10587,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 320 */
+/* 323 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10226,7 +10729,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'godinu',
             yy: translate
         },
-        ordinalParse: /\d{1,2}\./,
+        dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -10238,7 +10741,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 321 */
+/* 324 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10344,7 +10847,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: translate,
             yy: translate
         },
-        ordinalParse: /\d{1,2}\./,
+        dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -10356,7 +10859,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 322 */
+/* 325 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10436,7 +10939,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
                 return 'երեկոյան';
             }
         },
-        ordinalParse: /\d{1,2}|\d{1,2}-(ին|րդ)/,
+        dayOfMonthOrdinalParse: /\d{1,2}|\d{1,2}-(ին|րդ)/,
         ordinal: function ordinal(number, period) {
             switch (period) {
                 case 'DDD':
@@ -10461,7 +10964,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 323 */
+/* 326 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10553,7 +11056,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 324 */
+/* 327 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10677,7 +11180,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: translate,
             yy: translate
         },
-        ordinalParse: /\d{1,2}\./,
+        dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -10689,7 +11192,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 325 */
+/* 328 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10713,9 +11216,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     var it = moment.defineLocale('it', {
         months: 'gennaio_febbraio_marzo_aprile_maggio_giugno_luglio_agosto_settembre_ottobre_novembre_dicembre'.split('_'),
         monthsShort: 'gen_feb_mar_apr_mag_giu_lug_ago_set_ott_nov_dic'.split('_'),
-        weekdays: 'Domenica_Lunedì_Martedì_Mercoledì_Giovedì_Venerdì_Sabato'.split('_'),
-        weekdaysShort: 'Dom_Lun_Mar_Mer_Gio_Ven_Sab'.split('_'),
-        weekdaysMin: 'Do_Lu_Ma_Me_Gi_Ve_Sa'.split('_'),
+        weekdays: 'domenica_lunedì_martedì_mercoledì_giovedì_venerdì_sabato'.split('_'),
+        weekdaysShort: 'dom_lun_mar_mer_gio_ven_sab'.split('_'),
+        weekdaysMin: 'do_lu_ma_me_gi_ve_sa'.split('_'),
         longDateFormat: {
             LT: 'HH:mm',
             LTS: 'HH:mm:ss',
@@ -10756,7 +11259,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'un anno',
             yy: '%d anni'
         },
-        ordinalParse: /\d{1,2}º/,
+        dayOfMonthOrdinalParse: /\d{1,2}º/,
         ordinal: '%dº',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -10768,7 +11271,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 326 */
+/* 329 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10795,12 +11298,16 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         weekdaysShort: '日_月_火_水_木_金_土'.split('_'),
         weekdaysMin: '日_月_火_水_木_金_土'.split('_'),
         longDateFormat: {
-            LT: 'Ah時m分',
-            LTS: 'Ah時m分s秒',
+            LT: 'HH:mm',
+            LTS: 'HH:mm:ss',
             L: 'YYYY/MM/DD',
             LL: 'YYYY年M月D日',
-            LLL: 'YYYY年M月D日Ah時m分',
-            LLLL: 'YYYY年M月D日Ah時m分 dddd'
+            LLL: 'YYYY年M月D日 HH:mm',
+            LLLL: 'YYYY年M月D日 HH:mm dddd',
+            l: 'YYYY/MM/DD',
+            ll: 'YYYY年M月D日',
+            lll: 'YYYY年M月D日 HH:mm',
+            llll: 'YYYY年M月D日 HH:mm dddd'
         },
         meridiemParse: /午前|午後/i,
         isPM: function isPM(input) {
@@ -10821,7 +11328,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             lastWeek: '[前週]dddd LT',
             sameElse: 'L'
         },
-        ordinalParse: /\d{1,2}日/,
+        dayOfMonthOrdinalParse: /\d{1,2}日/,
         ordinal: function ordinal(number, period) {
             switch (period) {
                 case 'd':
@@ -10853,7 +11360,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 327 */
+/* 330 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10945,7 +11452,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 328 */
+/* 331 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11001,10 +11508,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             },
             past: function past(s) {
                 if (/(წამი|წუთი|საათი|დღე|თვე)/.test(s)) {
-                    return s.replace(/(ი|ე)$/, 'ის წინ');
+                    return s.replace(/(ი|ე)$/, 'ის უკან');
                 }
                 if (/წელი/.test(s)) {
-                    return s.replace(/წელი$/, 'წლის წინ');
+                    return s.replace(/წელი$/, 'წლის უკან');
                 }
             },
             s: 'რამდენიმე წამი',
@@ -11019,7 +11526,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'წელი',
             yy: '%d წელი'
         },
-        ordinalParse: /0|1-ლი|მე-\d{1,2}|\d{1,2}-ე/,
+        dayOfMonthOrdinalParse: /0|1-ლი|მე-\d{1,2}|\d{1,2}-ე/,
         ordinal: function ordinal(number) {
             if (number === 0) {
                 return number;
@@ -11042,7 +11549,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 329 */
+/* 332 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11122,7 +11629,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'бір жыл',
             yy: '%d жыл'
         },
-        ordinalParse: /\d{1,2}-(ші|шы)/,
+        dayOfMonthOrdinalParse: /\d{1,2}-(ші|шы)/,
         ordinal: function ordinal(number) {
             var a = number % 10,
                 b = number >= 100 ? 100 : null;
@@ -11138,7 +11645,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 330 */
+/* 333 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11205,7 +11712,142 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 331 */
+/* 334 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+//! moment.js locale configuration
+//! locale : Kannada [kn]
+//! author : Rajeev Naik : https://github.com/rajeevnaikte
+
+;(function (global, factory) {
+    ( false ? 'undefined' : _typeof(exports)) === 'object' && typeof module !== 'undefined' && "function" === 'function' ? factory(__webpack_require__(249)) :  true ? !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(249)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)) : factory(global.moment);
+})(undefined, function (moment) {
+    'use strict';
+
+    var symbolMap = {
+        '1': '೧',
+        '2': '೨',
+        '3': '೩',
+        '4': '೪',
+        '5': '೫',
+        '6': '೬',
+        '7': '೭',
+        '8': '೮',
+        '9': '೯',
+        '0': '೦'
+    };
+    var numberMap = {
+        '೧': '1',
+        '೨': '2',
+        '೩': '3',
+        '೪': '4',
+        '೫': '5',
+        '೬': '6',
+        '೭': '7',
+        '೮': '8',
+        '೯': '9',
+        '೦': '0'
+    };
+
+    var kn = moment.defineLocale('kn', {
+        months: 'ಜನವರಿ_ಫೆಬ್ರವರಿ_ಮಾರ್ಚ್_ಏಪ್ರಿಲ್_ಮೇ_ಜೂನ್_ಜುಲೈ_ಆಗಸ್ಟ್_ಸೆಪ್ಟೆಂಬರ್_ಅಕ್ಟೋಬರ್_ನವೆಂಬರ್_ಡಿಸೆಂಬರ್'.split('_'),
+        monthsShort: 'ಜನ_ಫೆಬ್ರ_ಮಾರ್ಚ್_ಏಪ್ರಿಲ್_ಮೇ_ಜೂನ್_ಜುಲೈ_ಆಗಸ್ಟ್_ಸೆಪ್ಟೆಂಬ_ಅಕ್ಟೋಬ_ನವೆಂಬ_ಡಿಸೆಂಬ'.split('_'),
+        monthsParseExact: true,
+        weekdays: 'ಭಾನುವಾರ_ಸೋಮವಾರ_ಮಂಗಳವಾರ_ಬುಧವಾರ_ಗುರುವಾರ_ಶುಕ್ರವಾರ_ಶನಿವಾರ'.split('_'),
+        weekdaysShort: 'ಭಾನು_ಸೋಮ_ಮಂಗಳ_ಬುಧ_ಗುರು_ಶುಕ್ರ_ಶನಿ'.split('_'),
+        weekdaysMin: 'ಭಾ_ಸೋ_ಮಂ_ಬು_ಗು_ಶು_ಶ'.split('_'),
+        longDateFormat: {
+            LT: 'A h:mm',
+            LTS: 'A h:mm:ss',
+            L: 'DD/MM/YYYY',
+            LL: 'D MMMM YYYY',
+            LLL: 'D MMMM YYYY, A h:mm',
+            LLLL: 'dddd, D MMMM YYYY, A h:mm'
+        },
+        calendar: {
+            sameDay: '[ಇಂದು] LT',
+            nextDay: '[ನಾಳೆ] LT',
+            nextWeek: 'dddd, LT',
+            lastDay: '[ನಿನ್ನೆ] LT',
+            lastWeek: '[ಕೊನೆಯ] dddd, LT',
+            sameElse: 'L'
+        },
+        relativeTime: {
+            future: '%s ನಂತರ',
+            past: '%s ಹಿಂದೆ',
+            s: 'ಕೆಲವು ಕ್ಷಣಗಳು',
+            m: 'ಒಂದು ನಿಮಿಷ',
+            mm: '%d ನಿಮಿಷ',
+            h: 'ಒಂದು ಗಂಟೆ',
+            hh: '%d ಗಂಟೆ',
+            d: 'ಒಂದು ದಿನ',
+            dd: '%d ದಿನ',
+            M: 'ಒಂದು ತಿಂಗಳು',
+            MM: '%d ತಿಂಗಳು',
+            y: 'ಒಂದು ವರ್ಷ',
+            yy: '%d ವರ್ಷ'
+        },
+        preparse: function preparse(string) {
+            return string.replace(/[೧೨೩೪೫೬೭೮೯೦]/g, function (match) {
+                return numberMap[match];
+            });
+        },
+        postformat: function postformat(string) {
+            return string.replace(/\d/g, function (match) {
+                return symbolMap[match];
+            });
+        },
+        meridiemParse: /ರಾತ್ರಿ|ಬೆಳಿಗ್ಗೆ|ಮಧ್ಯಾಹ್ನ|ಸಂಜೆ/,
+        meridiemHour: function meridiemHour(hour, meridiem) {
+            if (hour === 12) {
+                hour = 0;
+            }
+            if (meridiem === 'ರಾತ್ರಿ') {
+                return hour < 4 ? hour : hour + 12;
+            } else if (meridiem === 'ಬೆಳಿಗ್ಗೆ') {
+                return hour;
+            } else if (meridiem === 'ಮಧ್ಯಾಹ್ನ') {
+                return hour >= 10 ? hour : hour + 12;
+            } else if (meridiem === 'ಸಂಜೆ') {
+                return hour + 12;
+            }
+        },
+        meridiem: function meridiem(hour, minute, isLower) {
+            if (hour < 4) {
+                return 'ರಾತ್ರಿ';
+            } else if (hour < 10) {
+                return 'ಬೆಳಿಗ್ಗೆ';
+            } else if (hour < 17) {
+                return 'ಮಧ್ಯಾಹ್ನ';
+            } else if (hour < 20) {
+                return 'ಸಂಜೆ';
+            } else {
+                return 'ರಾತ್ರಿ';
+            }
+        },
+        dayOfMonthOrdinalParse: /\d{1,2}(ನೇ)/,
+        ordinal: function ordinal(number) {
+            return number + 'ನೇ';
+        },
+        week: {
+            dow: 0, // Sunday is the first day of the week.
+            doy: 6 // The week that contains Jan 1st is the first week of the year.
+        }
+    });
+
+    return kn;
+});
+
+/***/ }),
+/* 335 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11233,12 +11875,16 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         weekdaysShort: '일_월_화_수_목_금_토'.split('_'),
         weekdaysMin: '일_월_화_수_목_금_토'.split('_'),
         longDateFormat: {
-            LT: 'A h시 m분',
-            LTS: 'A h시 m분 s초',
+            LT: 'A h:mm',
+            LTS: 'A h:mm:ss',
             L: 'YYYY.MM.DD',
             LL: 'YYYY년 MMMM D일',
-            LLL: 'YYYY년 MMMM D일 A h시 m분',
-            LLLL: 'YYYY년 MMMM D일 dddd A h시 m분'
+            LLL: 'YYYY년 MMMM D일 A h:mm',
+            LLLL: 'YYYY년 MMMM D일 dddd A h:mm',
+            l: 'YYYY.MM.DD',
+            ll: 'YYYY년 MMMM D일',
+            lll: 'YYYY년 MMMM D일 A h:mm',
+            llll: 'YYYY년 MMMM D일 dddd A h:mm'
         },
         calendar: {
             sameDay: '오늘 LT',
@@ -11253,7 +11899,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             past: '%s 전',
             s: '몇 초',
             ss: '%d초',
-            m: '일분',
+            m: '1분',
             mm: '%d분',
             h: '한 시간',
             hh: '%d시간',
@@ -11264,7 +11910,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: '일 년',
             yy: '%d년'
         },
-        ordinalParse: /\d{1,2}일/,
+        dayOfMonthOrdinalParse: /\d{1,2}일/,
         ordinal: '%d일',
         meridiemParse: /오전|오후/,
         isPM: function isPM(token) {
@@ -11279,7 +11925,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 332 */
+/* 336 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11359,7 +12005,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'бир жыл',
             yy: '%d жыл'
         },
-        ordinalParse: /\d{1,2}-(чи|чы|чү|чу)/,
+        dayOfMonthOrdinalParse: /\d{1,2}-(чи|чы|чү|чу)/,
         ordinal: function ordinal(number) {
             var a = number % 10,
                 b = number >= 100 ? 100 : null;
@@ -11375,7 +12021,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 333 */
+/* 337 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11510,7 +12156,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: processRelativeTime,
             yy: '%d Joer'
         },
-        ordinalParse: /\d{1,2}\./,
+        dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -11522,7 +12168,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 334 */
+/* 338 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11591,7 +12237,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: '1 ປີ',
             yy: '%d ປີ'
         },
-        ordinalParse: /(ທີ່)\d{1,2}/,
+        dayOfMonthOrdinalParse: /(ທີ່)\d{1,2}/,
         ordinal: function ordinal(number) {
             return 'ທີ່' + number;
         }
@@ -11601,7 +12247,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 335 */
+/* 339 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11713,7 +12359,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: translateSingular,
             yy: translate
         },
-        ordinalParse: /\d{1,2}-oji/,
+        dayOfMonthOrdinalParse: /\d{1,2}-oji/,
         ordinal: function ordinal(number) {
             return number + '-oji';
         },
@@ -11727,7 +12373,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 336 */
+/* 340 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11821,7 +12467,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: relativeTimeWithSingular,
             yy: relativeTimeWithPlural
         },
-        ordinalParse: /\d{1,2}\./,
+        dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -11833,7 +12479,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 337 */
+/* 341 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11933,7 +12579,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'godinu',
             yy: translator.translate
         },
-        ordinalParse: /\d{1,2}\./,
+        dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -11945,7 +12591,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 338 */
+/* 342 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12006,7 +12652,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'he tau',
             yy: '%d tau'
         },
-        ordinalParse: /\d{1,2}º/,
+        dayOfMonthOrdinalParse: /\d{1,2}º/,
         ordinal: '%dº',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -12018,7 +12664,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 339 */
+/* 343 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12087,7 +12733,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'година',
             yy: '%d години'
         },
-        ordinalParse: /\d{1,2}-(ев|ен|ти|ви|ри|ми)/,
+        dayOfMonthOrdinalParse: /\d{1,2}-(ев|ен|ти|ви|ри|ми)/,
         ordinal: function ordinal(number) {
             var lastDigit = number % 10,
                 last2Digits = number % 100;
@@ -12117,7 +12763,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 340 */
+/* 344 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12205,7 +12851,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 341 */
+/* 345 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12393,7 +13039,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 342 */
+/* 346 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12485,7 +13131,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 343 */
+/* 347 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12576,7 +13222,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 344 */
+/* 348 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12681,7 +13327,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 345 */
+/* 349 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12741,7 +13387,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'ett år',
             yy: '%d år'
         },
-        ordinalParse: /\d{1,2}\./,
+        dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -12753,7 +13399,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 346 */
+/* 350 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12885,7 +13531,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 347 */
+/* 351 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12915,7 +13561,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     var nlBe = moment.defineLocale('nl-be', {
         months: 'januari_februari_maart_april_mei_juni_juli_augustus_september_oktober_november_december'.split('_'),
         monthsShort: function monthsShort(m, format) {
-            if (/-MMM-/.test(format)) {
+            if (!m) {
+                return monthsShortWithDots;
+            } else if (/-MMM-/.test(format)) {
                 return monthsShortWithoutDots[m.month()];
             } else {
                 return monthsShortWithDots[m.month()];
@@ -12966,7 +13614,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'één jaar',
             yy: '%d jaar'
         },
-        ordinalParse: /\d{1,2}(ste|de)/,
+        dayOfMonthOrdinalParse: /\d{1,2}(ste|de)/,
         ordinal: function ordinal(number) {
             return number + (number === 1 || number === 8 || number >= 20 ? 'ste' : 'de');
         },
@@ -12980,7 +13628,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 348 */
+/* 352 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13010,7 +13658,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     var nl = moment.defineLocale('nl', {
         months: 'januari_februari_maart_april_mei_juni_juli_augustus_september_oktober_november_december'.split('_'),
         monthsShort: function monthsShort(m, format) {
-            if (/-MMM-/.test(format)) {
+            if (!m) {
+                return monthsShortWithDots;
+            } else if (/-MMM-/.test(format)) {
                 return monthsShortWithoutDots[m.month()];
             } else {
                 return monthsShortWithDots[m.month()];
@@ -13061,7 +13711,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'één jaar',
             yy: '%d jaar'
         },
-        ordinalParse: /\d{1,2}(ste|de)/,
+        dayOfMonthOrdinalParse: /\d{1,2}(ste|de)/,
         ordinal: function ordinal(number) {
             return number + (number === 1 || number === 8 || number >= 20 ? 'ste' : 'de');
         },
@@ -13075,7 +13725,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 349 */
+/* 353 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13132,7 +13782,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'eit år',
             yy: '%d år'
         },
-        ordinalParse: /\d{1,2}\./,
+        dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -13144,7 +13794,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 350 */
+/* 354 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13277,7 +13927,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 351 */
+/* 355 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13322,7 +13972,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     var pl = moment.defineLocale('pl', {
         months: function months(momentToFormat, format) {
-            if (format === '') {
+            if (!momentToFormat) {
+                return monthsNominative;
+            } else if (format === '') {
                 // Hack: if format empty we know this is used to generate
                 // RegExp by moment. Give then back both valid forms of months
                 // in RegExp ready format.
@@ -13379,7 +14031,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'rok',
             yy: translate
         },
-        ordinalParse: /\d{1,2}\./,
+        dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -13391,7 +14043,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 352 */
+/* 356 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13416,7 +14068,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         monthsShort: 'Jan_Fev_Mar_Abr_Mai_Jun_Jul_Ago_Set_Out_Nov_Dez'.split('_'),
         weekdays: 'Domingo_Segunda-feira_Terça-feira_Quarta-feira_Quinta-feira_Sexta-feira_Sábado'.split('_'),
         weekdaysShort: 'Dom_Seg_Ter_Qua_Qui_Sex_Sáb'.split('_'),
-        weekdaysMin: 'Dom_2ª_3ª_4ª_5ª_6ª_Sáb'.split('_'),
+        weekdaysMin: 'Do_2ª_3ª_4ª_5ª_6ª_Sá'.split('_'),
         weekdaysParseExact: true,
         longDateFormat: {
             LT: 'HH:mm',
@@ -13452,7 +14104,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'um ano',
             yy: '%d anos'
         },
-        ordinalParse: /\d{1,2}º/,
+        dayOfMonthOrdinalParse: /\d{1,2}º/,
         ordinal: '%dº'
     });
 
@@ -13460,7 +14112,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 353 */
+/* 357 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13485,7 +14137,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         monthsShort: 'Jan_Fev_Mar_Abr_Mai_Jun_Jul_Ago_Set_Out_Nov_Dez'.split('_'),
         weekdays: 'Domingo_Segunda-Feira_Terça-Feira_Quarta-Feira_Quinta-Feira_Sexta-Feira_Sábado'.split('_'),
         weekdaysShort: 'Dom_Seg_Ter_Qua_Qui_Sex_Sáb'.split('_'),
-        weekdaysMin: 'Dom_2ª_3ª_4ª_5ª_6ª_Sáb'.split('_'),
+        weekdaysMin: 'Do_2ª_3ª_4ª_5ª_6ª_Sá'.split('_'),
         weekdaysParseExact: true,
         longDateFormat: {
             LT: 'HH:mm',
@@ -13521,7 +14173,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'um ano',
             yy: '%d anos'
         },
-        ordinalParse: /\d{1,2}º/,
+        dayOfMonthOrdinalParse: /\d{1,2}º/,
         ordinal: '%dº',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -13533,7 +14185,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 354 */
+/* 358 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13617,7 +14269,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 355 */
+/* 359 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13783,7 +14435,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
                 return 'вечера';
             }
         },
-        ordinalParse: /\d{1,2}-(й|го|я)/,
+        dayOfMonthOrdinalParse: /\d{1,2}-(й|го|я)/,
         ordinal: function ordinal(number, period) {
             switch (period) {
                 case 'M':
@@ -13809,7 +14461,93 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 356 */
+/* 360 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+//! moment.js locale configuration
+//! locale : Sindhi [sd]
+//! author : Narain Sagar : https://github.com/narainsagar
+
+;(function (global, factory) {
+    ( false ? 'undefined' : _typeof(exports)) === 'object' && typeof module !== 'undefined' && "function" === 'function' ? factory(__webpack_require__(249)) :  true ? !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(249)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)) : factory(global.moment);
+})(undefined, function (moment) {
+    'use strict';
+
+    var months = ['جنوري', 'فيبروري', 'مارچ', 'اپريل', 'مئي', 'جون', 'جولاءِ', 'آگسٽ', 'سيپٽمبر', 'آڪٽوبر', 'نومبر', 'ڊسمبر'];
+    var days = ['آچر', 'سومر', 'اڱارو', 'اربع', 'خميس', 'جمع', 'ڇنڇر'];
+
+    var sd = moment.defineLocale('sd', {
+        months: months,
+        monthsShort: months,
+        weekdays: days,
+        weekdaysShort: days,
+        weekdaysMin: days,
+        longDateFormat: {
+            LT: 'HH:mm',
+            LTS: 'HH:mm:ss',
+            L: 'DD/MM/YYYY',
+            LL: 'D MMMM YYYY',
+            LLL: 'D MMMM YYYY HH:mm',
+            LLLL: 'dddd، D MMMM YYYY HH:mm'
+        },
+        meridiemParse: /صبح|شام/,
+        isPM: function isPM(input) {
+            return 'شام' === input;
+        },
+        meridiem: function meridiem(hour, minute, isLower) {
+            if (hour < 12) {
+                return 'صبح';
+            }
+            return 'شام';
+        },
+        calendar: {
+            sameDay: '[اڄ] LT',
+            nextDay: '[سڀاڻي] LT',
+            nextWeek: 'dddd [اڳين هفتي تي] LT',
+            lastDay: '[ڪالهه] LT',
+            lastWeek: '[گزريل هفتي] dddd [تي] LT',
+            sameElse: 'L'
+        },
+        relativeTime: {
+            future: '%s پوء',
+            past: '%s اڳ',
+            s: 'چند سيڪنڊ',
+            m: 'هڪ منٽ',
+            mm: '%d منٽ',
+            h: 'هڪ ڪلاڪ',
+            hh: '%d ڪلاڪ',
+            d: 'هڪ ڏينهن',
+            dd: '%d ڏينهن',
+            M: 'هڪ مهينو',
+            MM: '%d مهينا',
+            y: 'هڪ سال',
+            yy: '%d سال'
+        },
+        preparse: function preparse(string) {
+            return string.replace(/،/g, ',');
+        },
+        postformat: function postformat(string) {
+            return string.replace(/,/g, '،');
+        },
+        week: {
+            dow: 1, // Monday is the first day of the week.
+            doy: 4 // The week that contains Jan 4th is the first week of the year.
+        }
+    });
+
+    return sd;
+});
+
+/***/ }),
+/* 361 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13866,7 +14604,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'okta jahki',
             yy: '%d jagit'
         },
-        ordinalParse: /\d{1,2}\./,
+        dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -13878,7 +14616,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 357 */
+/* 362 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13938,7 +14676,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'වසර',
             yy: 'වසර %d'
         },
-        ordinalParse: /\d{1,2} වැනි/,
+        dayOfMonthOrdinalParse: /\d{1,2} වැනි/,
         ordinal: function ordinal(number) {
             return number + ' වැනි';
         },
@@ -13959,7 +14697,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 358 */
+/* 363 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14117,7 +14855,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: translate,
             yy: translate
         },
-        ordinalParse: /\d{1,2}\./,
+        dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -14129,7 +14867,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 359 */
+/* 364 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14288,7 +15026,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: processRelativeTime,
             yy: processRelativeTime
         },
-        ordinalParse: /\d{1,2}\./,
+        dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -14300,7 +15038,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 360 */
+/* 365 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14367,7 +15105,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'një vit',
             yy: '%d vite'
         },
-        ordinalParse: /\d{1,2}\./,
+        dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -14379,7 +15117,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 361 */
+/* 366 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14478,7 +15216,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'годину',
             yy: translator.translate
         },
-        ordinalParse: /\d{1,2}\./,
+        dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -14490,7 +15228,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 362 */
+/* 367 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14589,7 +15327,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'godinu',
             yy: translator.translate
         },
-        ordinalParse: /\d{1,2}\./,
+        dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -14601,7 +15339,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 363 */
+/* 368 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14686,7 +15424,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
                 return hour + 12;
             }
         },
-        ordinalParse: /\d{1,2}/,
+        dayOfMonthOrdinalParse: /\d{1,2}/,
         ordinal: '%d',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -14698,7 +15436,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 364 */
+/* 369 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14757,7 +15495,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'ett år',
             yy: '%d år'
         },
-        ordinalParse: /\d{1,2}(e|a)/,
+        dayOfMonthOrdinalParse: /\d{1,2}(e|a)/,
         ordinal: function ordinal(number) {
             var b = number % 10,
                 output = ~~(number % 100 / 10) === 1 ? 'e' : b === 1 ? 'a' : b === 2 ? 'a' : b === 3 ? 'e' : 'e';
@@ -14773,7 +15511,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 365 */
+/* 370 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14841,7 +15579,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 366 */
+/* 371 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14923,7 +15661,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'ஒரு வருடம்',
             yy: '%d ஆண்டுகள்'
         },
-        ordinalParse: /\d{1,2}வது/,
+        dayOfMonthOrdinalParse: /\d{1,2}வது/,
         ordinal: function ordinal(number) {
             return number + 'வது';
         },
@@ -14980,7 +15718,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 367 */
+/* 372 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15038,7 +15776,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'ఒక సంవత్సరం',
             yy: '%d సంవత్సరాలు'
         },
-        ordinalParse: /\d{1,2}వ/,
+        dayOfMonthOrdinalParse: /\d{1,2}వ/,
         ordinal: '%dవ',
         meridiemParse: /రాత్రి|ఉదయం|మధ్యాహ్నం|సాయంత్రం/,
         meridiemHour: function meridiemHour(hour, meridiem) {
@@ -15078,7 +15816,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 368 */
+/* 373 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15136,7 +15874,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'tinan ida',
             yy: 'tinan %d'
         },
-        ordinalParse: /\d{1,2}(st|nd|rd|th)/,
+        dayOfMonthOrdinalParse: /\d{1,2}(st|nd|rd|th)/,
         ordinal: function ordinal(number) {
             var b = number % 10,
                 output = ~~(number % 100 / 10) === 1 ? 'th' : b === 1 ? 'st' : b === 2 ? 'nd' : b === 3 ? 'rd' : 'th';
@@ -15152,7 +15890,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 369 */
+/* 374 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15183,7 +15921,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         longDateFormat: {
             LT: 'H:mm',
             LTS: 'H:mm:ss',
-            L: 'YYYY/MM/DD',
+            L: 'DD/MM/YYYY',
             LL: 'D MMMM YYYY',
             LLL: 'D MMMM YYYY เวลา H:mm',
             LLLL: 'วันddddที่ D MMMM YYYY เวลา H:mm'
@@ -15228,7 +15966,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 370 */
+/* 375 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15285,7 +16023,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'isang taon',
             yy: '%d taon'
         },
-        ordinalParse: /\d{1,2}/,
+        dayOfMonthOrdinalParse: /\d{1,2}/,
         ordinal: function ordinal(number) {
             return number;
         },
@@ -15299,7 +16037,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 371 */
+/* 376 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15404,7 +16142,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'wa’ DIS',
             yy: translate
         },
-        ordinalParse: /\d{1,2}\./,
+        dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -15416,7 +16154,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 372 */
+/* 377 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15495,7 +16233,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'bir yıl',
             yy: '%d yıl'
         },
-        ordinalParse: /\d{1,2}'(inci|nci|üncü|ncı|uncu|ıncı)/,
+        dayOfMonthOrdinalParse: /\d{1,2}'(inci|nci|üncü|ncı|uncu|ıncı)/,
         ordinal: function ordinal(number) {
             if (number === 0) {
                 // special case for zero
@@ -15516,7 +16254,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 373 */
+/* 378 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15588,7 +16326,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: processRelativeTime,
             yy: processRelativeTime
         },
-        ordinalParse: /\d{1,2}\./,
+        dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -15617,7 +16355,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 374 */
+/* 379 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15684,7 +16422,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 375 */
+/* 380 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15751,7 +16489,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 376 */
+/* 381 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15797,8 +16535,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             'nominative': 'неділя_понеділок_вівторок_середа_четвер_п’ятниця_субота'.split('_'),
             'accusative': 'неділю_понеділок_вівторок_середу_четвер_п’ятницю_суботу'.split('_'),
             'genitive': 'неділі_понеділка_вівторка_середи_четверга_п’ятниці_суботи'.split('_')
-        },
-            nounCase = /(\[[ВвУу]\]) ?dddd/.test(format) ? 'accusative' : /\[?(?:минулої|наступної)? ?\] ?dddd/.test(format) ? 'genitive' : 'nominative';
+        };
+
+        if (!m) {
+            return weekdays['nominative'];
+        }
+
+        var nounCase = /(\[[ВвУу]\]) ?dddd/.test(format) ? 'accusative' : /\[?(?:минулої|наступної)? ?\] ?dddd/.test(format) ? 'genitive' : 'nominative';
         return weekdays[nounCase][m.day()];
     }
     function processHoursFunction(str) {
@@ -15876,7 +16619,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
                 return 'вечора';
             }
         },
-        ordinalParse: /\d{1,2}-(й|го)/,
+        dayOfMonthOrdinalParse: /\d{1,2}-(й|го)/,
         ordinal: function ordinal(number, period) {
             switch (period) {
                 case 'M':
@@ -15901,7 +16644,161 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 377 */
+/* 382 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+//! moment.js locale configuration
+//! locale : Urdu [ur]
+//! author : Sawood Alam : https://github.com/ibnesayeed
+//! author : Zack : https://github.com/ZackVision
+
+;(function (global, factory) {
+    ( false ? 'undefined' : _typeof(exports)) === 'object' && typeof module !== 'undefined' && "function" === 'function' ? factory(__webpack_require__(249)) :  true ? !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(249)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)) : factory(global.moment);
+})(undefined, function (moment) {
+    'use strict';
+
+    var months = ['جنوری', 'فروری', 'مارچ', 'اپریل', 'مئی', 'جون', 'جولائی', 'اگست', 'ستمبر', 'اکتوبر', 'نومبر', 'دسمبر'];
+    var days = ['اتوار', 'پیر', 'منگل', 'بدھ', 'جمعرات', 'جمعہ', 'ہفتہ'];
+
+    var ur = moment.defineLocale('ur', {
+        months: months,
+        monthsShort: months,
+        weekdays: days,
+        weekdaysShort: days,
+        weekdaysMin: days,
+        longDateFormat: {
+            LT: 'HH:mm',
+            LTS: 'HH:mm:ss',
+            L: 'DD/MM/YYYY',
+            LL: 'D MMMM YYYY',
+            LLL: 'D MMMM YYYY HH:mm',
+            LLLL: 'dddd، D MMMM YYYY HH:mm'
+        },
+        meridiemParse: /صبح|شام/,
+        isPM: function isPM(input) {
+            return 'شام' === input;
+        },
+        meridiem: function meridiem(hour, minute, isLower) {
+            if (hour < 12) {
+                return 'صبح';
+            }
+            return 'شام';
+        },
+        calendar: {
+            sameDay: '[آج بوقت] LT',
+            nextDay: '[کل بوقت] LT',
+            nextWeek: 'dddd [بوقت] LT',
+            lastDay: '[گذشتہ روز بوقت] LT',
+            lastWeek: '[گذشتہ] dddd [بوقت] LT',
+            sameElse: 'L'
+        },
+        relativeTime: {
+            future: '%s بعد',
+            past: '%s قبل',
+            s: 'چند سیکنڈ',
+            m: 'ایک منٹ',
+            mm: '%d منٹ',
+            h: 'ایک گھنٹہ',
+            hh: '%d گھنٹے',
+            d: 'ایک دن',
+            dd: '%d دن',
+            M: 'ایک ماہ',
+            MM: '%d ماہ',
+            y: 'ایک سال',
+            yy: '%d سال'
+        },
+        preparse: function preparse(string) {
+            return string.replace(/،/g, ',');
+        },
+        postformat: function postformat(string) {
+            return string.replace(/,/g, '،');
+        },
+        week: {
+            dow: 1, // Monday is the first day of the week.
+            doy: 4 // The week that contains Jan 4th is the first week of the year.
+        }
+    });
+
+    return ur;
+});
+
+/***/ }),
+/* 383 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+//! moment.js locale configuration
+//! locale : Uzbek Latin [uz-latn]
+//! author : Rasulbek Mirzayev : github.com/Rasulbeeek
+
+;(function (global, factory) {
+    ( false ? 'undefined' : _typeof(exports)) === 'object' && typeof module !== 'undefined' && "function" === 'function' ? factory(__webpack_require__(249)) :  true ? !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(249)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)) : factory(global.moment);
+})(undefined, function (moment) {
+    'use strict';
+
+    var uzLatn = moment.defineLocale('uz-latn', {
+        months: 'Yanvar_Fevral_Mart_Aprel_May_Iyun_Iyul_Avgust_Sentabr_Oktabr_Noyabr_Dekabr'.split('_'),
+        monthsShort: 'Yan_Fev_Mar_Apr_May_Iyun_Iyul_Avg_Sen_Okt_Noy_Dek'.split('_'),
+        weekdays: 'Yakshanba_Dushanba_Seshanba_Chorshanba_Payshanba_Juma_Shanba'.split('_'),
+        weekdaysShort: 'Yak_Dush_Sesh_Chor_Pay_Jum_Shan'.split('_'),
+        weekdaysMin: 'Ya_Du_Se_Cho_Pa_Ju_Sha'.split('_'),
+        longDateFormat: {
+            LT: 'HH:mm',
+            LTS: 'HH:mm:ss',
+            L: 'DD/MM/YYYY',
+            LL: 'D MMMM YYYY',
+            LLL: 'D MMMM YYYY HH:mm',
+            LLLL: 'D MMMM YYYY, dddd HH:mm'
+        },
+        calendar: {
+            sameDay: '[Bugun soat] LT [da]',
+            nextDay: '[Ertaga] LT [da]',
+            nextWeek: 'dddd [kuni soat] LT [da]',
+            lastDay: '[Kecha soat] LT [da]',
+            lastWeek: '[O\'tgan] dddd [kuni soat] LT [da]',
+            sameElse: 'L'
+        },
+        relativeTime: {
+            future: 'Yaqin %s ichida',
+            past: 'Bir necha %s oldin',
+            s: 'soniya',
+            m: 'bir daqiqa',
+            mm: '%d daqiqa',
+            h: 'bir soat',
+            hh: '%d soat',
+            d: 'bir kun',
+            dd: '%d kun',
+            M: 'bir oy',
+            MM: '%d oy',
+            y: 'bir yil',
+            yy: '%d yil'
+        },
+        week: {
+            dow: 1, // Monday is the first day of the week.
+            doy: 7 // The week that contains Jan 1st is the first week of the year.
+        }
+    });
+
+    return uzLatn;
+});
+
+/***/ }),
+/* 384 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15968,7 +16865,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 378 */
+/* 385 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16043,7 +16940,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'một năm',
             yy: '%d năm'
         },
-        ordinalParse: /\d{1,2}/,
+        dayOfMonthOrdinalParse: /\d{1,2}/,
         ordinal: function ordinal(number) {
             return number;
         },
@@ -16057,7 +16954,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 379 */
+/* 386 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16115,7 +17012,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'á ~ýéár',
             yy: '%d ý~éárs'
         },
-        ordinalParse: /\d{1,2}(th|st|nd|rd)/,
+        dayOfMonthOrdinalParse: /\d{1,2}(th|st|nd|rd)/,
         ordinal: function ordinal(number) {
             var b = number % 10,
                 output = ~~(number % 100 / 10) === 1 ? 'th' : b === 1 ? 'st' : b === 2 ? 'nd' : b === 3 ? 'rd' : 'th';
@@ -16131,7 +17028,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 380 */
+/* 387 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16188,7 +17085,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             y: 'ọdún kan',
             yy: 'ọdún %d'
         },
-        ordinalParse: /ọjọ́\s\d{1,2}/,
+        dayOfMonthOrdinalParse: /ọjọ́\s\d{1,2}/,
         ordinal: 'ọjọ́ %d',
         week: {
             dow: 1, // Monday is the first day of the week.
@@ -16200,7 +17097,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 381 */
+/* 388 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16228,16 +17125,16 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         weekdaysShort: '周日_周一_周二_周三_周四_周五_周六'.split('_'),
         weekdaysMin: '日_一_二_三_四_五_六'.split('_'),
         longDateFormat: {
-            LT: 'Ah点mm分',
-            LTS: 'Ah点m分s秒',
-            L: 'YYYY-MM-DD',
+            LT: 'HH:mm',
+            LTS: 'HH:mm:ss',
+            L: 'YYYY年MMMD日',
             LL: 'YYYY年MMMD日',
             LLL: 'YYYY年MMMD日Ah点mm分',
             LLLL: 'YYYY年MMMD日ddddAh点mm分',
-            l: 'YYYY-MM-DD',
+            l: 'YYYY年MMMD日',
             ll: 'YYYY年MMMD日',
-            lll: 'YYYY年MMMD日Ah点mm分',
-            llll: 'YYYY年MMMD日ddddAh点mm分'
+            lll: 'YYYY年MMMD日 HH:mm',
+            llll: 'YYYY年MMMD日dddd HH:mm'
         },
         meridiemParse: /凌晨|早上|上午|中午|下午|晚上/,
         meridiemHour: function meridiemHour(hour, meridiem) {
@@ -16270,30 +17167,14 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             }
         },
         calendar: {
-            sameDay: function sameDay() {
-                return this.minutes() === 0 ? '[今天]Ah[点整]' : '[今天]LT';
-            },
-            nextDay: function nextDay() {
-                return this.minutes() === 0 ? '[明天]Ah[点整]' : '[明天]LT';
-            },
-            lastDay: function lastDay() {
-                return this.minutes() === 0 ? '[昨天]Ah[点整]' : '[昨天]LT';
-            },
-            nextWeek: function nextWeek() {
-                var startOfWeek, prefix;
-                startOfWeek = moment().startOf('week');
-                prefix = this.diff(startOfWeek, 'days') >= 7 ? '[下]' : '[本]';
-                return this.minutes() === 0 ? prefix + 'dddAh点整' : prefix + 'dddAh点mm';
-            },
-            lastWeek: function lastWeek() {
-                var startOfWeek, prefix;
-                startOfWeek = moment().startOf('week');
-                prefix = this.unix() < startOfWeek.unix() ? '[上]' : '[本]';
-                return this.minutes() === 0 ? prefix + 'dddAh点整' : prefix + 'dddAh点mm';
-            },
-            sameElse: 'LL'
+            sameDay: '[今天]LT',
+            nextDay: '[明天]LT',
+            nextWeek: '[下]ddddLT',
+            lastDay: '[昨天]LT',
+            lastWeek: '[上]ddddLT',
+            sameElse: 'L'
         },
-        ordinalParse: /\d{1,2}(日|月|周)/,
+        dayOfMonthOrdinalParse: /\d{1,2}(日|月|周)/,
         ordinal: function ordinal(number, period) {
             switch (period) {
                 case 'd':
@@ -16335,7 +17216,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 382 */
+/* 389 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16364,16 +17245,16 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         weekdaysShort: '週日_週一_週二_週三_週四_週五_週六'.split('_'),
         weekdaysMin: '日_一_二_三_四_五_六'.split('_'),
         longDateFormat: {
-            LT: 'Ah點mm分',
-            LTS: 'Ah點m分s秒',
+            LT: 'HH:mm',
+            LTS: 'HH:mm:ss',
             L: 'YYYY年MMMD日',
             LL: 'YYYY年MMMD日',
-            LLL: 'YYYY年MMMD日Ah點mm分',
-            LLLL: 'YYYY年MMMD日ddddAh點mm分',
+            LLL: 'YYYY年MMMD日 HH:mm',
+            LLLL: 'YYYY年MMMD日dddd HH:mm',
             l: 'YYYY年MMMD日',
             ll: 'YYYY年MMMD日',
-            lll: 'YYYY年MMMD日Ah點mm分',
-            llll: 'YYYY年MMMD日ddddAh點mm分'
+            lll: 'YYYY年MMMD日 HH:mm',
+            llll: 'YYYY年MMMD日dddd HH:mm'
         },
         meridiemParse: /凌晨|早上|上午|中午|下午|晚上/,
         meridiemHour: function meridiemHour(hour, meridiem) {
@@ -16412,7 +17293,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             lastWeek: '[上]ddddLT',
             sameElse: 'L'
         },
-        ordinalParse: /\d{1,2}(日|月|週)/,
+        dayOfMonthOrdinalParse: /\d{1,2}(日|月|週)/,
         ordinal: function ordinal(number, period) {
             switch (period) {
                 case 'd':
@@ -16449,7 +17330,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 383 */
+/* 390 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16477,16 +17358,16 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         weekdaysShort: '週日_週一_週二_週三_週四_週五_週六'.split('_'),
         weekdaysMin: '日_一_二_三_四_五_六'.split('_'),
         longDateFormat: {
-            LT: 'Ah點mm分',
-            LTS: 'Ah點m分s秒',
+            LT: 'HH:mm',
+            LTS: 'HH:mm:ss',
             L: 'YYYY年MMMD日',
             LL: 'YYYY年MMMD日',
-            LLL: 'YYYY年MMMD日Ah點mm分',
-            LLLL: 'YYYY年MMMD日ddddAh點mm分',
+            LLL: 'YYYY年MMMD日 HH:mm',
+            LLLL: 'YYYY年MMMD日dddd HH:mm',
             l: 'YYYY年MMMD日',
             ll: 'YYYY年MMMD日',
-            lll: 'YYYY年MMMD日Ah點mm分',
-            llll: 'YYYY年MMMD日ddddAh點mm分'
+            lll: 'YYYY年MMMD日 HH:mm',
+            llll: 'YYYY年MMMD日dddd HH:mm'
         },
         meridiemParse: /凌晨|早上|上午|中午|下午|晚上/,
         meridiemHour: function meridiemHour(hour, meridiem) {
@@ -16525,7 +17406,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             lastWeek: '[上]ddddLT',
             sameElse: 'L'
         },
-        ordinalParse: /\d{1,2}(日|月|週)/,
+        dayOfMonthOrdinalParse: /\d{1,2}(日|月|週)/,
         ordinal: function ordinal(number, period) {
             switch (period) {
                 case 'd':
@@ -16562,7 +17443,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 384 */
+/* 391 */
 /***/ (function(module, exports) {
 
 /* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {/* globals __webpack_amd_options__ */
@@ -16571,7 +17452,7 @@ module.exports = __webpack_amd_options__;
 /* WEBPACK VAR INJECTION */}.call(exports, {}))
 
 /***/ }),
-/* 385 */
+/* 392 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16580,58 +17461,58 @@ module.exports = __webpack_amd_options__;
 /**
  * @namespace Chart
  */
-var Chart = __webpack_require__(406)();
+var Chart = __webpack_require__(413)();
 
-__webpack_require__(404)(Chart);
-__webpack_require__(420)(Chart);
-__webpack_require__(400)(Chart);
-__webpack_require__(409)(Chart);
-__webpack_require__(403)(Chart);
-__webpack_require__(399)(Chart);
-__webpack_require__(401)(Chart);
-__webpack_require__(402)(Chart);
-__webpack_require__(407)(Chart);
 __webpack_require__(411)(Chart);
-__webpack_require__(412)(Chart);
-__webpack_require__(410)(Chart);
-__webpack_require__(413)(Chart);
-__webpack_require__(408)(Chart);
-__webpack_require__(405)(Chart);
-__webpack_require__(414)(Chart);
-
-__webpack_require__(415)(Chart);
+__webpack_require__(427)(Chart);
+__webpack_require__(407)(Chart);
 __webpack_require__(416)(Chart);
-__webpack_require__(417)(Chart);
+__webpack_require__(410)(Chart);
+__webpack_require__(406)(Chart);
+__webpack_require__(408)(Chart);
+__webpack_require__(409)(Chart);
+__webpack_require__(414)(Chart);
 __webpack_require__(418)(Chart);
-
-__webpack_require__(423)(Chart);
+__webpack_require__(419)(Chart);
+__webpack_require__(417)(Chart);
+__webpack_require__(420)(Chart);
+__webpack_require__(415)(Chart);
+__webpack_require__(412)(Chart);
 __webpack_require__(421)(Chart);
+
 __webpack_require__(422)(Chart);
+__webpack_require__(423)(Chart);
 __webpack_require__(424)(Chart);
 __webpack_require__(425)(Chart);
-__webpack_require__(426)(Chart);
+
+__webpack_require__(430)(Chart);
+__webpack_require__(428)(Chart);
+__webpack_require__(429)(Chart);
+__webpack_require__(431)(Chart);
+__webpack_require__(432)(Chart);
+__webpack_require__(433)(Chart);
 
 // Controllers must be loaded after elements
 // See Chart.core.datasetController.dataElementType
+__webpack_require__(400)(Chart);
+__webpack_require__(401)(Chart);
+__webpack_require__(402)(Chart);
+__webpack_require__(403)(Chart);
+__webpack_require__(404)(Chart);
+__webpack_require__(405)(Chart);
+
 __webpack_require__(393)(Chart);
 __webpack_require__(394)(Chart);
 __webpack_require__(395)(Chart);
 __webpack_require__(396)(Chart);
 __webpack_require__(397)(Chart);
 __webpack_require__(398)(Chart);
-
-__webpack_require__(386)(Chart);
-__webpack_require__(387)(Chart);
-__webpack_require__(388)(Chart);
-__webpack_require__(389)(Chart);
-__webpack_require__(390)(Chart);
-__webpack_require__(391)(Chart);
-__webpack_require__(392)(Chart);
+__webpack_require__(399)(Chart);
 
 window.Chart = module.exports = Chart;
 
 /***/ }),
-/* 386 */
+/* 393 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16647,7 +17528,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 387 */
+/* 394 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16662,7 +17543,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 388 */
+/* 395 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16678,7 +17559,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 389 */
+/* 396 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16694,7 +17575,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 390 */
+/* 397 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16710,7 +17591,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 391 */
+/* 398 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16726,7 +17607,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 392 */
+/* 399 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16778,7 +17659,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 393 */
+/* 400 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -17293,7 +18174,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 394 */
+/* 401 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -17423,7 +18304,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 395 */
+/* 402 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -17733,7 +18614,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 396 */
+/* 403 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18075,7 +18956,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 397 */
+/* 404 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18296,7 +19177,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 398 */
+/* 405 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18478,7 +19359,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 399 */
+/* 406 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18623,7 +19504,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 400 */
+/* 407 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18754,7 +19635,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 401 */
+/* 408 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19506,7 +20387,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 402 */
+/* 409 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19821,7 +20702,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 403 */
+/* 410 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19922,7 +20803,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 404 */
+/* 411 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19932,7 +20813,7 @@ module.exports = function (Chart) {
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var color = __webpack_require__(428);
+var color = __webpack_require__(435);
 
 module.exports = function (Chart) {
 	// Global Chart helpers object for utility methods and classes
@@ -20870,7 +21751,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 405 */
+/* 412 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21188,7 +22069,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 406 */
+/* 413 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21250,7 +22131,7 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 407 */
+/* 414 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21624,7 +22505,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 408 */
+/* 415 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22162,7 +23043,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 409 */
+/* 416 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22493,7 +23374,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 410 */
+/* 417 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23251,7 +24132,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 411 */
+/* 418 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23297,7 +24178,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 412 */
+/* 419 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23511,7 +24392,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 413 */
+/* 420 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23735,7 +24616,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 414 */
+/* 421 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24621,7 +25502,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 415 */
+/* 422 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24731,7 +25612,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 416 */
+/* 423 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24913,7 +25794,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 417 */
+/* 424 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25019,7 +25900,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 418 */
+/* 425 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25227,7 +26108,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 419 */
+/* 426 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25498,7 +26379,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 420 */
+/* 427 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25507,7 +26388,7 @@ module.exports = function (Chart) {
 // By default, select the browser (DOM) platform.
 // @TODO Make possible to select another platform at build time.
 
-var implementation = __webpack_require__(419);
+var implementation = __webpack_require__(426);
 
 module.exports = function (Chart) {
 	/**
@@ -25574,7 +26455,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 421 */
+/* 428 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25704,7 +26585,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 422 */
+/* 429 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25888,7 +26769,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 423 */
+/* 430 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25992,7 +26873,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 424 */
+/* 431 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26237,7 +27118,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 425 */
+/* 432 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26742,7 +27623,7 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 426 */
+/* 433 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27205,14 +28086,14 @@ module.exports = function (Chart) {
 };
 
 /***/ }),
-/* 427 */
+/* 434 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 /* MIT license */
-var colorNames = __webpack_require__(431);
+var colorNames = __webpack_require__(438);
 
 module.exports = {
    getRgba: getRgba,
@@ -27422,7 +28303,7 @@ for (var name in colorNames) {
 }
 
 /***/ }),
-/* 428 */
+/* 435 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27431,8 +28312,8 @@ for (var name in colorNames) {
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 /* MIT license */
-var convert = __webpack_require__(430);
-var string = __webpack_require__(427);
+var convert = __webpack_require__(437);
+var string = __webpack_require__(434);
 
 var Color = function Color(obj) {
 	if (obj instanceof Color) {
@@ -27911,7 +28792,7 @@ if (typeof window !== 'undefined') {
 module.exports = Color;
 
 /***/ }),
-/* 429 */
+/* 436 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28614,13 +29495,13 @@ for (var key in cssKeywords) {
 }
 
 /***/ }),
-/* 430 */
+/* 437 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var conversions = __webpack_require__(429);
+var conversions = __webpack_require__(436);
 
 var convert = function convert() {
   return new Converter();
@@ -28710,7 +29591,7 @@ Converter.prototype.getValues = function (space) {
 module.exports = convert;
 
 /***/ }),
-/* 431 */
+/* 438 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28868,8 +29749,8 @@ module.exports = {
 };
 
 /***/ }),
-/* 432 */,
-/* 433 */
+/* 439 */,
+/* 440 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28895,8 +29776,8 @@ PollOption.propTypes = {
 module.exports = PollOption;
 
 /***/ }),
-/* 434 */,
-/* 435 */
+/* 441 */,
+/* 442 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30713,7 +31594,7 @@ module.exports = isEqual;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(275), __webpack_require__(113)(module)))
 
 /***/ }),
-/* 436 */
+/* 443 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40151,7 +41032,7 @@ LazyWrapper.prototype.clone=lazyClone;LazyWrapper.prototype.reverse=lazyReverse;
 lodash.prototype.at=wrapperAt;lodash.prototype.chain=wrapperChain;lodash.prototype.commit=wrapperCommit;lodash.prototype.next=wrapperNext;lodash.prototype.plant=wrapperPlant;lodash.prototype.reverse=wrapperReverse;lodash.prototype.toJSON=lodash.prototype.valueOf=lodash.prototype.value=wrapperValue;// Add lazy aliases.
 lodash.prototype.first=lodash.prototype.head;if(symIterator){lodash.prototype[symIterator]=wrapperToIterator;}return lodash;};/*--------------------------------------------------------------------------*/// Export lodash.
 var _=runInContext();// Some AMD build optimizers, like r.js, check for condition patterns like:
-if("function"=='function'&&_typeof(__webpack_require__(384))=='object'&&__webpack_require__(384)){// Expose Lodash on the global object to prevent errors when Lodash is
+if("function"=='function'&&_typeof(__webpack_require__(391))=='object'&&__webpack_require__(391)){// Expose Lodash on the global object to prevent errors when Lodash is
 // loaded by a script tag in the presence of an AMD loader.
 // See http://requirejs.org/docs/errors.html#mismatch for more details.
 // Use `_.noConflict` to remove Lodash from the global object.
@@ -40166,7 +41047,7 @@ root._=_;}}).call(undefined);
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(275), __webpack_require__(113)(module)))
 
 /***/ }),
-/* 437 */
+/* 444 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40207,11 +41088,11 @@ var _reactDom = __webpack_require__(80);
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
-var _chart = __webpack_require__(385);
+var _chart = __webpack_require__(392);
 
 var _chart2 = _interopRequireDefault(_chart);
 
-var _lodash = __webpack_require__(435);
+var _lodash = __webpack_require__(442);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
@@ -40692,226 +41573,240 @@ var defaults = exports.defaults = _chart2.default.defaults;
 exports.Chart = _chart2.default;
 
 /***/ }),
-/* 438 */
+/* 445 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var map = {
 	"./af": 276,
 	"./af.js": 276,
-	"./ar": 282,
+	"./ar": 283,
 	"./ar-dz": 277,
 	"./ar-dz.js": 277,
-	"./ar-ly": 278,
-	"./ar-ly.js": 278,
-	"./ar-ma": 279,
-	"./ar-ma.js": 279,
-	"./ar-sa": 280,
-	"./ar-sa.js": 280,
-	"./ar-tn": 281,
-	"./ar-tn.js": 281,
-	"./ar.js": 282,
-	"./az": 283,
-	"./az.js": 283,
-	"./be": 284,
-	"./be.js": 284,
-	"./bg": 285,
-	"./bg.js": 285,
-	"./bn": 286,
-	"./bn.js": 286,
-	"./bo": 287,
-	"./bo.js": 287,
-	"./br": 288,
-	"./br.js": 288,
-	"./bs": 289,
-	"./bs.js": 289,
-	"./ca": 290,
-	"./ca.js": 290,
-	"./cs": 291,
-	"./cs.js": 291,
-	"./cv": 292,
-	"./cv.js": 292,
-	"./cy": 293,
-	"./cy.js": 293,
-	"./da": 294,
-	"./da.js": 294,
-	"./de": 296,
-	"./de-at": 295,
-	"./de-at.js": 295,
-	"./de.js": 296,
-	"./dv": 297,
-	"./dv.js": 297,
-	"./el": 298,
-	"./el.js": 298,
-	"./en-au": 299,
-	"./en-au.js": 299,
-	"./en-ca": 300,
-	"./en-ca.js": 300,
-	"./en-gb": 301,
-	"./en-gb.js": 301,
-	"./en-ie": 302,
-	"./en-ie.js": 302,
-	"./en-nz": 303,
-	"./en-nz.js": 303,
-	"./eo": 304,
-	"./eo.js": 304,
-	"./es": 306,
-	"./es-do": 305,
-	"./es-do.js": 305,
-	"./es.js": 306,
-	"./et": 307,
-	"./et.js": 307,
-	"./eu": 308,
-	"./eu.js": 308,
-	"./fa": 309,
-	"./fa.js": 309,
-	"./fi": 310,
-	"./fi.js": 310,
-	"./fo": 311,
-	"./fo.js": 311,
-	"./fr": 314,
-	"./fr-ca": 312,
-	"./fr-ca.js": 312,
-	"./fr-ch": 313,
-	"./fr-ch.js": 313,
-	"./fr.js": 314,
-	"./fy": 315,
-	"./fy.js": 315,
-	"./gd": 316,
-	"./gd.js": 316,
-	"./gl": 317,
-	"./gl.js": 317,
-	"./he": 318,
-	"./he.js": 318,
-	"./hi": 319,
-	"./hi.js": 319,
-	"./hr": 320,
-	"./hr.js": 320,
-	"./hu": 321,
-	"./hu.js": 321,
-	"./hy-am": 322,
-	"./hy-am.js": 322,
-	"./id": 323,
-	"./id.js": 323,
-	"./is": 324,
-	"./is.js": 324,
-	"./it": 325,
-	"./it.js": 325,
-	"./ja": 326,
-	"./ja.js": 326,
-	"./jv": 327,
-	"./jv.js": 327,
-	"./ka": 328,
-	"./ka.js": 328,
-	"./kk": 329,
-	"./kk.js": 329,
-	"./km": 330,
-	"./km.js": 330,
-	"./ko": 331,
-	"./ko.js": 331,
-	"./ky": 332,
-	"./ky.js": 332,
-	"./lb": 333,
-	"./lb.js": 333,
-	"./lo": 334,
-	"./lo.js": 334,
-	"./lt": 335,
-	"./lt.js": 335,
-	"./lv": 336,
-	"./lv.js": 336,
-	"./me": 337,
-	"./me.js": 337,
-	"./mi": 338,
-	"./mi.js": 338,
-	"./mk": 339,
-	"./mk.js": 339,
-	"./ml": 340,
-	"./ml.js": 340,
-	"./mr": 341,
-	"./mr.js": 341,
-	"./ms": 343,
-	"./ms-my": 342,
-	"./ms-my.js": 342,
-	"./ms.js": 343,
-	"./my": 344,
-	"./my.js": 344,
-	"./nb": 345,
-	"./nb.js": 345,
-	"./ne": 346,
-	"./ne.js": 346,
-	"./nl": 348,
-	"./nl-be": 347,
-	"./nl-be.js": 347,
-	"./nl.js": 348,
-	"./nn": 349,
-	"./nn.js": 349,
-	"./pa-in": 350,
-	"./pa-in.js": 350,
-	"./pl": 351,
-	"./pl.js": 351,
-	"./pt": 353,
-	"./pt-br": 352,
-	"./pt-br.js": 352,
-	"./pt.js": 353,
-	"./ro": 354,
-	"./ro.js": 354,
-	"./ru": 355,
-	"./ru.js": 355,
-	"./se": 356,
-	"./se.js": 356,
-	"./si": 357,
-	"./si.js": 357,
-	"./sk": 358,
-	"./sk.js": 358,
-	"./sl": 359,
-	"./sl.js": 359,
-	"./sq": 360,
-	"./sq.js": 360,
-	"./sr": 362,
-	"./sr-cyrl": 361,
-	"./sr-cyrl.js": 361,
-	"./sr.js": 362,
-	"./ss": 363,
-	"./ss.js": 363,
-	"./sv": 364,
-	"./sv.js": 364,
-	"./sw": 365,
-	"./sw.js": 365,
-	"./ta": 366,
-	"./ta.js": 366,
-	"./te": 367,
-	"./te.js": 367,
-	"./tet": 368,
-	"./tet.js": 368,
-	"./th": 369,
-	"./th.js": 369,
-	"./tl-ph": 370,
-	"./tl-ph.js": 370,
-	"./tlh": 371,
-	"./tlh.js": 371,
-	"./tr": 372,
-	"./tr.js": 372,
-	"./tzl": 373,
-	"./tzl.js": 373,
-	"./tzm": 375,
-	"./tzm-latn": 374,
-	"./tzm-latn.js": 374,
-	"./tzm.js": 375,
-	"./uk": 376,
-	"./uk.js": 376,
-	"./uz": 377,
-	"./uz.js": 377,
-	"./vi": 378,
-	"./vi.js": 378,
-	"./x-pseudo": 379,
-	"./x-pseudo.js": 379,
-	"./yo": 380,
-	"./yo.js": 380,
-	"./zh-cn": 381,
-	"./zh-cn.js": 381,
-	"./zh-hk": 382,
-	"./zh-hk.js": 382,
-	"./zh-tw": 383,
-	"./zh-tw.js": 383
+	"./ar-kw": 278,
+	"./ar-kw.js": 278,
+	"./ar-ly": 279,
+	"./ar-ly.js": 279,
+	"./ar-ma": 280,
+	"./ar-ma.js": 280,
+	"./ar-sa": 281,
+	"./ar-sa.js": 281,
+	"./ar-tn": 282,
+	"./ar-tn.js": 282,
+	"./ar.js": 283,
+	"./az": 284,
+	"./az.js": 284,
+	"./be": 285,
+	"./be.js": 285,
+	"./bg": 286,
+	"./bg.js": 286,
+	"./bn": 287,
+	"./bn.js": 287,
+	"./bo": 288,
+	"./bo.js": 288,
+	"./br": 289,
+	"./br.js": 289,
+	"./bs": 290,
+	"./bs.js": 290,
+	"./ca": 291,
+	"./ca.js": 291,
+	"./cs": 292,
+	"./cs.js": 292,
+	"./cv": 293,
+	"./cv.js": 293,
+	"./cy": 294,
+	"./cy.js": 294,
+	"./da": 295,
+	"./da.js": 295,
+	"./de": 298,
+	"./de-at": 296,
+	"./de-at.js": 296,
+	"./de-ch": 297,
+	"./de-ch.js": 297,
+	"./de.js": 298,
+	"./dv": 299,
+	"./dv.js": 299,
+	"./el": 300,
+	"./el.js": 300,
+	"./en-au": 301,
+	"./en-au.js": 301,
+	"./en-ca": 302,
+	"./en-ca.js": 302,
+	"./en-gb": 303,
+	"./en-gb.js": 303,
+	"./en-ie": 304,
+	"./en-ie.js": 304,
+	"./en-nz": 305,
+	"./en-nz.js": 305,
+	"./eo": 306,
+	"./eo.js": 306,
+	"./es": 308,
+	"./es-do": 307,
+	"./es-do.js": 307,
+	"./es.js": 308,
+	"./et": 309,
+	"./et.js": 309,
+	"./eu": 310,
+	"./eu.js": 310,
+	"./fa": 311,
+	"./fa.js": 311,
+	"./fi": 312,
+	"./fi.js": 312,
+	"./fo": 313,
+	"./fo.js": 313,
+	"./fr": 316,
+	"./fr-ca": 314,
+	"./fr-ca.js": 314,
+	"./fr-ch": 315,
+	"./fr-ch.js": 315,
+	"./fr.js": 316,
+	"./fy": 317,
+	"./fy.js": 317,
+	"./gd": 318,
+	"./gd.js": 318,
+	"./gl": 319,
+	"./gl.js": 319,
+	"./gom-latn": 320,
+	"./gom-latn.js": 320,
+	"./he": 321,
+	"./he.js": 321,
+	"./hi": 322,
+	"./hi.js": 322,
+	"./hr": 323,
+	"./hr.js": 323,
+	"./hu": 324,
+	"./hu.js": 324,
+	"./hy-am": 325,
+	"./hy-am.js": 325,
+	"./id": 326,
+	"./id.js": 326,
+	"./is": 327,
+	"./is.js": 327,
+	"./it": 328,
+	"./it.js": 328,
+	"./ja": 329,
+	"./ja.js": 329,
+	"./jv": 330,
+	"./jv.js": 330,
+	"./ka": 331,
+	"./ka.js": 331,
+	"./kk": 332,
+	"./kk.js": 332,
+	"./km": 333,
+	"./km.js": 333,
+	"./kn": 334,
+	"./kn.js": 334,
+	"./ko": 335,
+	"./ko.js": 335,
+	"./ky": 336,
+	"./ky.js": 336,
+	"./lb": 337,
+	"./lb.js": 337,
+	"./lo": 338,
+	"./lo.js": 338,
+	"./lt": 339,
+	"./lt.js": 339,
+	"./lv": 340,
+	"./lv.js": 340,
+	"./me": 341,
+	"./me.js": 341,
+	"./mi": 342,
+	"./mi.js": 342,
+	"./mk": 343,
+	"./mk.js": 343,
+	"./ml": 344,
+	"./ml.js": 344,
+	"./mr": 345,
+	"./mr.js": 345,
+	"./ms": 347,
+	"./ms-my": 346,
+	"./ms-my.js": 346,
+	"./ms.js": 347,
+	"./my": 348,
+	"./my.js": 348,
+	"./nb": 349,
+	"./nb.js": 349,
+	"./ne": 350,
+	"./ne.js": 350,
+	"./nl": 352,
+	"./nl-be": 351,
+	"./nl-be.js": 351,
+	"./nl.js": 352,
+	"./nn": 353,
+	"./nn.js": 353,
+	"./pa-in": 354,
+	"./pa-in.js": 354,
+	"./pl": 355,
+	"./pl.js": 355,
+	"./pt": 357,
+	"./pt-br": 356,
+	"./pt-br.js": 356,
+	"./pt.js": 357,
+	"./ro": 358,
+	"./ro.js": 358,
+	"./ru": 359,
+	"./ru.js": 359,
+	"./sd": 360,
+	"./sd.js": 360,
+	"./se": 361,
+	"./se.js": 361,
+	"./si": 362,
+	"./si.js": 362,
+	"./sk": 363,
+	"./sk.js": 363,
+	"./sl": 364,
+	"./sl.js": 364,
+	"./sq": 365,
+	"./sq.js": 365,
+	"./sr": 367,
+	"./sr-cyrl": 366,
+	"./sr-cyrl.js": 366,
+	"./sr.js": 367,
+	"./ss": 368,
+	"./ss.js": 368,
+	"./sv": 369,
+	"./sv.js": 369,
+	"./sw": 370,
+	"./sw.js": 370,
+	"./ta": 371,
+	"./ta.js": 371,
+	"./te": 372,
+	"./te.js": 372,
+	"./tet": 373,
+	"./tet.js": 373,
+	"./th": 374,
+	"./th.js": 374,
+	"./tl-ph": 375,
+	"./tl-ph.js": 375,
+	"./tlh": 376,
+	"./tlh.js": 376,
+	"./tr": 377,
+	"./tr.js": 377,
+	"./tzl": 378,
+	"./tzl.js": 378,
+	"./tzm": 380,
+	"./tzm-latn": 379,
+	"./tzm-latn.js": 379,
+	"./tzm.js": 380,
+	"./uk": 381,
+	"./uk.js": 381,
+	"./ur": 382,
+	"./ur.js": 382,
+	"./uz": 384,
+	"./uz-latn": 383,
+	"./uz-latn.js": 383,
+	"./uz.js": 384,
+	"./vi": 385,
+	"./vi.js": 385,
+	"./x-pseudo": 386,
+	"./x-pseudo.js": 386,
+	"./yo": 387,
+	"./yo.js": 387,
+	"./zh-cn": 388,
+	"./zh-cn.js": 388,
+	"./zh-hk": 389,
+	"./zh-hk.js": 389,
+	"./zh-tw": 390,
+	"./zh-tw.js": 390
 };
 function webpackContext(req) {
 	return __webpack_require__(webpackContextResolve(req));
@@ -40927,7 +41822,7 @@ webpackContext.keys = function webpackContextKeys() {
 };
 webpackContext.resolve = webpackContextResolve;
 module.exports = webpackContext;
-webpackContext.id = 438;
+webpackContext.id = 445;
 
 
 /***/ })

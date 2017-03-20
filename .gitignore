@@ -1,4 +1,4 @@
-public/bundlerino.js
+public/*.js
 node_modules/
 .eslintcache
 coverage
