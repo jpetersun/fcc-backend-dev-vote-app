@@ -82,11 +82,11 @@ class Details extends React.Component {
     axios.get(`/polls/${this.props.params.userId}/${this.props.params.id}`)
       .then((response) => {
         const data = response.data[0]
-        console.log(data)
+        // console.log(data)
         for (let i = 0; i < data.options.length; i += 1) {
           this.randyColors.push('#' + (Math.random() * 0xFFFFFF << 0).toString(16))
         }
-        console.log(this.randyColors)
+        // console.log(this.randyColors)
         const labels = data.options.map(option => option.name)
         const votes = data.options.map(option => option.votes)
         const firstOption = data.options[0].name

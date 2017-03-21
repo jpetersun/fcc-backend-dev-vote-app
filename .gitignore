@@ -1,4 +1,4 @@
-public/*.js
+public/
 node_modules/
 .eslintcache
 coverage

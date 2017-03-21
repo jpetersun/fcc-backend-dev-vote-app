@@ -1,6 +1,5 @@
 const React = require('react')
 const axios = require('axios')
-const Router = require('react-router')
 // class Option extends React.Component {
 //   constructor (props) {
 //     super(props)

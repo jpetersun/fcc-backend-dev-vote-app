@@ -16,7 +16,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 var React = __webpack_require__(5);
 var axios = __webpack_require__(257);
-var Router = __webpack_require__(44);
 // class Option extends React.Component {
 //   constructor (props) {
 //     super(props)
