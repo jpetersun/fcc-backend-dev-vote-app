@@ -21,6 +21,7 @@ const GitHubStrategy = require('passport-github2').Strategy
 const GITHUB_CLIENT_ID = "5f05c2d5f34d08bed5b8";
 const GITHUB_CLIENT_SECRET = "080c7113b4430bfb74a781232d8f144a67acc837";
 const mongoose = require('mongoose')
+const ip = require('ip')
 
 const optionSchema = mongoose.Schema({
   name: {
@@ -34,7 +35,8 @@ const pollSchema = mongoose.Schema({
     type: String,
     required: true
   },
-  options: [optionSchema]
+  options: [optionSchema],
+  votersIpAddress: Array
 })
 const Poll = mongoose.model('Poll', pollSchema)
 const Option = mongoose.model('Option', optionSchema)
@@ -44,7 +46,7 @@ const userSchema = new mongoose.Schema({
   name: String,
   someID: String,
   avatar: String,
-  polls: [pollSchema]
+  polls: [pollSchema],
 })
 const User = mongoose.model('User', userSchema);
 
@@ -195,9 +197,15 @@ app.post('/poll-results/:userId/:id', (req, res) => {
     })
     // console.log(thePoll)
     const option = thePoll[0].options.id(req.body._id)
-    option.votes += 1
-    user.save()
-    res.send(option)
+    const poll = thePoll[0]
+    if (poll.votersIpAddress.indexOf(ip.address()) >= 0) {
+      res.send('You already voted')
+    } else {
+      poll.votersIpAddress.push(ip.address())
+      option.votes += 1
+      user.save()
+      res.send(option)
+    }
   })
   // Poll.findById(req.params.id, (err, poll) => {
   //   if (err) console.error(err)

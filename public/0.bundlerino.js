@@ -72,6 +72,9 @@ var Details = function (_React$Component) {
         name: name,
         _id: id
       }).then(function (response) {
+        if (typeof response.data === 'string') {
+          alert(response.data);
+        }
         axios.get('/polls/' + _this2.props.params.userId + '/' + _this2.props.params.id).then(function (response) {
           var data = response.data[0];
           var labels = data.options.map(function (option) {

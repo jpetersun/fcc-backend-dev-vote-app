@@ -19,6 +19,7 @@
     "express": "^4.14.1",
     "express-session": "^1.15.1",
     "express-sessions": "^1.0.6",
+    "ip": "^1.1.5",
     "lodash": "^4.17.4",
     "mongodb": "^2.2.23",
     "mongoose": "^4.8.2",
