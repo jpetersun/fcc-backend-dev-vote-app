@@ -9,7 +9,6 @@ const Layout = (props) => (
         </h4>
         <nav className='mdl-navigation mdl-layout--large-screen-only'>
           <a className='mdl-navigation__link' href='/create-poll'>Create Poll</a>
-          <a className='mdl-navigation__link' href='/auth/github'>Login - Github</a>
           <a className='mdl-navigation__link' href='/account'>Account</a>
           <a className='mdl-navigation__link' href='/logout'>Logout</a>
         </nav>

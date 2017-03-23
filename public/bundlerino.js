@@ -13150,11 +13150,6 @@ var Layout = function Layout(props) {
           ),
           React.createElement(
             'a',
-            { className: 'mdl-navigation__link', href: '/auth/github' },
-            'Login - Github'
-          ),
-          React.createElement(
-            'a',
             { className: 'mdl-navigation__link', href: '/account' },
             'Account'
           ),

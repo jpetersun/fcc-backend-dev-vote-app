@@ -132,7 +132,7 @@ app.get('/auth/github/callback',
   passport.authenticate('github', { failureRedirect: '/login' }),
   function(req, res) {
     // console.log(req.user)
-    res.redirect('/');
+    res.redirect('/')
   });
 
 app.get('/logout', function(req, res){
@@ -144,7 +144,6 @@ function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) { return next(); }
   res.redirect('/login')
 }
-
 
 mongoose.connect('mongodb://localhost:27017/vote-app')
 

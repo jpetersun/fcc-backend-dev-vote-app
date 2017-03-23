@@ -54,7 +54,7 @@ class Details extends React.Component {
     })
     .then((response) => {
       if (typeof response.data === 'string') {
-        alert(response.data)
+        window.alert(response.data)
       }
       axios.get(`/polls/${this.props.params.userId}/${this.props.params.id}`)
         .then((response) => {
