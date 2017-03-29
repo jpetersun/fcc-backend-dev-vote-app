@@ -1,9 +1,45 @@
-label {
-  display: block;
+html,
+body {
+  background-color: #fff;
+  color: #000;
 }
 
-canvas {
-	max-width: 900px;
-	margin-left: auto;
-	margin-right: auto;
+body {
+  margin: 0;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI"
+    "Roboto",
+    "Oxygen",
+    "Cantarell",
+    sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+// ul {
+//   list-style-type: none;
+// }
+
+li {
+  border-bottom: 1px solid #ccc;
+  padding: 1rem 0;
+}
+@media (min-width: 900px) {
+  li {
+    border: 0;
+  }
+}
+a {
+  text-decoration: none;
+}
+
+li:before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  display: inline-block;
+  border-radius: 50%;
+  background: #CCC;
+  margin-right: 20px;
 }

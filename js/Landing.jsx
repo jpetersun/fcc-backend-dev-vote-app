@@ -5,6 +5,11 @@ const Poll = require('./Poll')
 // const { object, arrayOf } = React.PropTypes
 // console.log(polls)
 const axios = require('axios')
+
+const ul = {
+  listStyleType: 'none',
+  paddingLeft: '0'
+}
 class Landing extends React.Component {
   constructor (props) {
     super(props)
@@ -31,7 +36,7 @@ class Landing extends React.Component {
       })
     })
     return (
-      <ul className='demo-list-item mdl-list'>
+      <ul style={ul}>
         {polls.map((poll) => (
           <Poll {...poll} key={poll._id} />
         ))}

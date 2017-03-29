@@ -13119,59 +13119,142 @@ function shim(obj) {
 "use strict";
 
 
-var React = __webpack_require__(5);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var Layout = function Layout(props) {
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var React = __webpack_require__(5);
+var MenuIcon = __webpack_require__(440);
+
+var title = {
+  textAlign: 'center',
+  color: '#000'
+};
+
+var titleLink = {
+  color: '#000',
+  textDecoration: 'none'
+};
+
+var content = {
+  padding: '0 20px 0 20px',
+  maxWidth: '900px',
+  margin: '0 auto'
+};
+var navigation = {
+  textAlign: 'center'
+};
+var navigationLink = {
+  margin: '1rem',
+  display: 'block',
+  color: '#999',
+  textDecoration: 'none'
+};
+
+var menuIcon = {
+  width: '20px',
+  position: 'absolute',
+  top: '2rem',
+  right: '2rem'
+};
+
+function Nav(props) {
+  if (!props.warn) {
+    return null;
+  }
   return React.createElement(
-    'div',
-    { className: 'mdl-layout mdl-js-layout mdl-layout--fixed-header' },
+    'nav',
+    { style: navigation, className: 'navigation' },
     React.createElement(
-      'header',
-      { className: 'mdl-layout__header' },
-      React.createElement(
+      'a',
+      { style: navigationLink, href: '/create-poll' },
+      'Create Poll'
+    ),
+    React.createElement(
+      'a',
+      { style: navigationLink, href: '/account' },
+      'Account'
+    ),
+    React.createElement(
+      'a',
+      { style: navigationLink, href: '/logout' },
+      'Logout'
+    )
+  );
+}
+
+var Layout = function (_React$Component) {
+  _inherits(Layout, _React$Component);
+
+  function Layout(props) {
+    _classCallCheck(this, Layout);
+
+    var _this = _possibleConstructorReturn(this, (Layout.__proto__ || Object.getPrototypeOf(Layout)).call(this, props));
+
+    _this.handleIconClick = _this.handleIconClick.bind(_this);
+    _this.state = {
+      showWarning: false
+    };
+    return _this;
+  }
+
+  _createClass(Layout, [{
+    key: 'handleIconClick',
+    value: function handleIconClick(e) {
+      this.setState(function (prevState) {
+        return {
+          showWarning: !prevState.showWarning
+        };
+      });
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      return React.createElement(
         'div',
-        { className: 'mdl-layout__header-row' },
+        { className: 'layout' },
         React.createElement(
-          'h4',
-          { className: 'mdl-layout-spacer layout-title' },
+          'header',
+          { className: 'header' },
+          React.createElement(
+            'div',
+            { style: menuIcon },
+            React.createElement(
+              'a',
+              { onClick: this.handleIconClick, href: 'javascript:void(0)' },
+              React.createElement(MenuIcon, null)
+            )
+          ),
+          React.createElement(Nav, { warn: this.state.showWarning })
+        ),
+        React.createElement(
+          'h1',
+          { style: title, className: 'layout-title' },
           React.createElement(
             'a',
-            { style: { color: '#fff', textDecoration: 'none' }, href: '/' },
-            'Vote App'
+            { style: titleLink, href: '/' },
+            'Vote On It'
           )
         ),
         React.createElement(
-          'nav',
-          { className: 'mdl-navigation mdl-layout--large-screen-only' },
+          'main',
+          { className: '' },
           React.createElement(
-            'a',
-            { className: 'mdl-navigation__link', href: '/create-poll' },
-            'Create Poll'
-          ),
-          React.createElement(
-            'a',
-            { className: 'mdl-navigation__link', href: '/account' },
-            'Account'
-          ),
-          React.createElement(
-            'a',
-            { className: 'mdl-navigation__link', href: '/logout' },
-            'Logout'
+            'div',
+            { style: content, className: 'content' },
+            this.props.children
           )
         )
-      )
-    ),
-    React.createElement(
-      'main',
-      { className: 'mdl-layout__content' },
-      React.createElement(
-        'div',
-        { className: 'page-content' },
-        props.children
-      )
-    )
-  );
-};
+      );
+    }
+  }]);
+
+  return Layout;
+}(React.Component);
 
 var element = React.PropTypes.element;
 
@@ -27974,6 +28057,235 @@ match({ history: App.History, routes: App.Routes }, function (error, redirectLoc
   }
   ReactDOM.render(React.createElement(App, renderProps), document.getElementById('app'));
 });
+
+/***/ }),
+/* 244 */,
+/* 245 */,
+/* 246 */,
+/* 247 */,
+/* 248 */,
+/* 249 */,
+/* 250 */,
+/* 251 */,
+/* 252 */,
+/* 253 */,
+/* 254 */,
+/* 255 */,
+/* 256 */,
+/* 257 */,
+/* 258 */,
+/* 259 */,
+/* 260 */,
+/* 261 */,
+/* 262 */,
+/* 263 */,
+/* 264 */,
+/* 265 */,
+/* 266 */,
+/* 267 */,
+/* 268 */,
+/* 269 */,
+/* 270 */,
+/* 271 */,
+/* 272 */,
+/* 273 */,
+/* 274 */,
+/* 275 */,
+/* 276 */,
+/* 277 */,
+/* 278 */,
+/* 279 */,
+/* 280 */,
+/* 281 */,
+/* 282 */,
+/* 283 */,
+/* 284 */,
+/* 285 */,
+/* 286 */,
+/* 287 */,
+/* 288 */,
+/* 289 */,
+/* 290 */,
+/* 291 */,
+/* 292 */,
+/* 293 */,
+/* 294 */,
+/* 295 */,
+/* 296 */,
+/* 297 */,
+/* 298 */,
+/* 299 */,
+/* 300 */,
+/* 301 */,
+/* 302 */,
+/* 303 */,
+/* 304 */,
+/* 305 */,
+/* 306 */,
+/* 307 */,
+/* 308 */,
+/* 309 */,
+/* 310 */,
+/* 311 */,
+/* 312 */,
+/* 313 */,
+/* 314 */,
+/* 315 */,
+/* 316 */,
+/* 317 */,
+/* 318 */,
+/* 319 */,
+/* 320 */,
+/* 321 */,
+/* 322 */,
+/* 323 */,
+/* 324 */,
+/* 325 */,
+/* 326 */,
+/* 327 */,
+/* 328 */,
+/* 329 */,
+/* 330 */,
+/* 331 */,
+/* 332 */,
+/* 333 */,
+/* 334 */,
+/* 335 */,
+/* 336 */,
+/* 337 */,
+/* 338 */,
+/* 339 */,
+/* 340 */,
+/* 341 */,
+/* 342 */,
+/* 343 */,
+/* 344 */,
+/* 345 */,
+/* 346 */,
+/* 347 */,
+/* 348 */,
+/* 349 */,
+/* 350 */,
+/* 351 */,
+/* 352 */,
+/* 353 */,
+/* 354 */,
+/* 355 */,
+/* 356 */,
+/* 357 */,
+/* 358 */,
+/* 359 */,
+/* 360 */,
+/* 361 */,
+/* 362 */,
+/* 363 */,
+/* 364 */,
+/* 365 */,
+/* 366 */,
+/* 367 */,
+/* 368 */,
+/* 369 */,
+/* 370 */,
+/* 371 */,
+/* 372 */,
+/* 373 */,
+/* 374 */,
+/* 375 */,
+/* 376 */,
+/* 377 */,
+/* 378 */,
+/* 379 */,
+/* 380 */,
+/* 381 */,
+/* 382 */,
+/* 383 */,
+/* 384 */,
+/* 385 */,
+/* 386 */,
+/* 387 */,
+/* 388 */,
+/* 389 */,
+/* 390 */,
+/* 391 */,
+/* 392 */,
+/* 393 */,
+/* 394 */,
+/* 395 */,
+/* 396 */,
+/* 397 */,
+/* 398 */,
+/* 399 */,
+/* 400 */,
+/* 401 */,
+/* 402 */,
+/* 403 */,
+/* 404 */,
+/* 405 */,
+/* 406 */,
+/* 407 */,
+/* 408 */,
+/* 409 */,
+/* 410 */,
+/* 411 */,
+/* 412 */,
+/* 413 */,
+/* 414 */,
+/* 415 */,
+/* 416 */,
+/* 417 */,
+/* 418 */,
+/* 419 */,
+/* 420 */,
+/* 421 */,
+/* 422 */,
+/* 423 */,
+/* 424 */,
+/* 425 */,
+/* 426 */,
+/* 427 */,
+/* 428 */,
+/* 429 */,
+/* 430 */,
+/* 431 */,
+/* 432 */,
+/* 433 */,
+/* 434 */,
+/* 435 */,
+/* 436 */,
+/* 437 */,
+/* 438 */,
+/* 439 */,
+/* 440 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _react = __webpack_require__(5);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var MenuIcon = function MenuIcon(props) {
+  return _react2.default.createElement(
+    'svg',
+    { viewBox: '0 0 226.216 226.216', enableBackground: 'new 0 0 226.216 226.216' },
+    _react2.default.createElement(
+      'g',
+      null,
+      _react2.default.createElement(
+        'g',
+        null,
+        _react2.default.createElement('path', { d: 'M8.701,43.503h208.814c5.22,0,8.701-3.48,8.701-8.701s-3.48-8.701-8.701-8.701H8.701C3.48,26.102,0,29.582,0,34.802    S3.48,43.503,8.701,43.503z' }),
+        _react2.default.createElement('path', { d: 'm217.515,104.407h-208.814c-5.22,0-8.701,3.48-8.701,8.701s3.48,8.701 8.701,8.701h208.814c5.22,0 8.701-3.48 8.701-8.701s-3.481-8.701-8.701-8.701z' }),
+        _react2.default.createElement('path', { d: 'm217.515,182.713h-208.814c-5.22,0-8.701,3.48-8.701,8.701s3.48,8.701 8.701,8.701h208.814c5.22,0 8.701-3.48 8.701-8.701s-3.481-8.701-8.701-8.701z' })
+      )
+    )
+  );
+};
+
+module.exports = MenuIcon;
 
 /***/ })
 /******/ ]);

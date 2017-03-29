@@ -24,6 +24,11 @@ var Poll = __webpack_require__(432);
 // console.log(polls)
 var axios = __webpack_require__(257);
 
+var ul = {
+  listStyleType: 'none',
+  paddingLeft: '0'
+};
+
 var Landing = function (_React$Component) {
   _inherits(Landing, _React$Component);
 
@@ -61,7 +66,7 @@ var Landing = function (_React$Component) {
       });
       return React.createElement(
         'ul',
-        { className: 'demo-list-item mdl-list' },
+        { style: ul },
         polls.map(function (poll) {
           return React.createElement(Poll, _extends({}, poll, { key: poll._id }));
         })
@@ -1563,16 +1568,19 @@ var React = __webpack_require__(5);
 var _require = __webpack_require__(44),
     Link = _require.Link;
 
+var linkStyle = {
+  color: '#000'
+};
 var Poll = function Poll(props) {
   return React.createElement(
     Link,
-    { to: '/details/' + props.userId + '/' + props._id },
+    { style: linkStyle, to: '/details/' + props.userId + '/' + props._id },
     React.createElement(
       'li',
-      { className: 'mdl-list__item' },
+      { className: '' },
       React.createElement(
         'span',
-        { className: 'mdl-list__item-primary-content' },
+        { className: '' },
         props.name
       )
     )

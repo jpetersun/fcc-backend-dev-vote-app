@@ -1,11 +1,14 @@
 const React = require('react')
 const { Link } = require('react-router')
 
+const linkStyle = {
+  color: '#000'
+}
 const Poll = (props) => {
   return (
-    <Link to={`/details/${props.userId}/${props._id}`}>
-      <li className='mdl-list__item'>
-        <span className='mdl-list__item-primary-content'>
+    <Link style={linkStyle} to={`/details/${props.userId}/${props._id}`}>
+      <li className=''>
+        <span className=''>
           {props.name}
         </span>
       </li>

@@ -1,24 +1,87 @@
 const React = require('react')
+const MenuIcon = require('./MenuIcon')
 
-const Layout = (props) => (
-  <div className='mdl-layout mdl-js-layout mdl-layout--fixed-header'>
-    <header className='mdl-layout__header'>
-      <div className='mdl-layout__header-row'>
-        <h4 className='mdl-layout-spacer layout-title'>
-          <a style={{color: '#fff', textDecoration: 'none'}} href='/'>Vote App</a>
-        </h4>
-        <nav className='mdl-navigation mdl-layout--large-screen-only'>
-          <a className='mdl-navigation__link' href='/create-poll'>Create Poll</a>
-          <a className='mdl-navigation__link' href='/account'>Account</a>
-          <a className='mdl-navigation__link' href='/logout'>Logout</a>
-        </nav>
+const title = {
+  textAlign: 'center',
+  color: '#000'
+}
+
+const titleLink = {
+  color: '#000',
+  textDecoration: 'none'
+}
+
+const content = {
+  padding: '0 20px 0 20px',
+  maxWidth: '900px',
+  margin: '0 auto'
+}
+const navigation = {
+  textAlign: 'center'
+}
+const navigationLink = {
+  margin: '1rem',
+  display: 'block',
+  color: '#999',
+  textDecoration: 'none'
+}
+
+const menuIcon = {
+  width: '20px',
+  position: 'absolute',
+  top: '2rem',
+  right: '2rem'
+}
+
+function Nav (props) {
+  if (!props.warn) {
+    return null
+  }
+  return (
+    <nav style={navigation} className='navigation'>
+      <a style={navigationLink} href='/create-poll'>Create Poll</a>
+      <a style={navigationLink} href='/account'>Account</a>
+      <a style={navigationLink} href='/logout'>Logout</a>
+    </nav>
+  )
+}
+
+class Layout extends React.Component {
+  constructor (props) {
+    super(props)
+    this.handleIconClick = this.handleIconClick.bind(this)
+    this.state = {
+      showWarning: false
+    }
+  }
+
+  handleIconClick (e) {
+    this.setState(prevState => ({
+      showWarning: !prevState.showWarning
+    }))
+  }
+
+  render () {
+    return (
+      <div className='layout'>
+        <header className='header'>
+          <div style={menuIcon}>
+            <a onClick={this.handleIconClick} href='javascript:void(0)'>
+              <MenuIcon />
+            </a>
+          </div>
+          <Nav warn={this.state.showWarning} />
+        </header>
+        <h1 style={title} className='layout-title'>
+          <a style={titleLink} href='/'>Vote On It</a>
+        </h1>
+        <main className=''>
+          <div style={content} className='content'>{this.props.children}</div>
+        </main>
       </div>
-    </header>
-    <main className='mdl-layout__content'>
-      <div className='page-content'>{props.children}</div>
-    </main>
-  </div>
-)
+    )
+  }
+}
 
 const { element } = React.PropTypes
 
