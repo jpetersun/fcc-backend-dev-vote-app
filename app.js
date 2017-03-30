@@ -132,7 +132,8 @@ app.get('/auth/github/callback',
   passport.authenticate('github', { failureRedirect: '/login' }),
   function(req, res) {
     // console.log(req.user)
-    res.redirect('/')
+    res.redirect(req.session.returnTo || '/')
+    delete req.session.returnTo
   });
 
 app.get('/logout', function(req, res){
@@ -142,6 +143,7 @@ app.get('/logout', function(req, res){
 
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) { return next(); }
+  req.session.returnTo = req.path
   res.redirect('/login')
 }
 

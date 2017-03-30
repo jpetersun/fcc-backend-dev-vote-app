@@ -13156,7 +13156,7 @@ var navigationLink = {
 };
 
 var menuIcon = {
-  width: '20px',
+  width: '40px',
   position: 'absolute',
   top: '2rem',
   right: '2rem'
