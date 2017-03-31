@@ -66,7 +66,7 @@ class CreatePoll extends React.Component {
         <input required className='input__option' type='text' />
         {this.state.options}
         <button onClick={this.renderOption}>Add Option</button>
-        <input type='submit' />
+        <input className='submit-btn' type='submit' />
       </form>
     )
   }

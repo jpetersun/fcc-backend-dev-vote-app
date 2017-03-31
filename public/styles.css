@@ -16,11 +16,28 @@ body {
     sans-serif;
   text-rendering: optimizeLegibility;
 }
+form {
+  margin: 0 auto;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+}
 
-// ul {
-//   list-style-type: none;
-// }
-
+.input__option {
+  border: 1px solid #ccc;
+  display: block;
+  margin: 1.5rem 0;
+}
+#poll-name {
+  border: 1px solid skyblue;
+}
+.submit-btn {
+  border: 1px solid #000;
+  margin-top: 2rem;
+}
+button {
+  border: 1px solid #000;
+}
 li {
   border-bottom: 1px solid #ccc;
   padding: 1rem 0;

@@ -20,6 +20,22 @@ var React = __webpack_require__(5);
 var UserPoll = __webpack_require__(434);
 var axios = __webpack_require__(257);
 
+var ul = {
+  listStyleType: 'none',
+  paddingLeft: '0'
+};
+
+var img = {
+  maxWidth: '50px',
+  display: 'block',
+  margin: '0 auto',
+  borderRadius: '50%'
+};
+
+var header = {
+  textAlign: 'center'
+};
+
 var Account = function (_React$Component) {
   _inherits(Account, _React$Component);
 
@@ -71,15 +87,15 @@ var Account = function (_React$Component) {
       return React.createElement(
         'div',
         null,
+        React.createElement('img', { style: img, src: this.state.userData.avatar, alt: 'thing' }),
         React.createElement(
           'h4',
-          null,
+          { style: header },
           this.state.userData.name
         ),
-        React.createElement('img', { src: this.state.userData.avatar, alt: 'thing' }),
         React.createElement(
           'ul',
-          { className: 'demo-list-item mdl-list' },
+          { style: ul },
           polls.map(function (poll) {
             return React.createElement(UserPoll, _extends({}, poll, { key: poll._id }));
           })
@@ -1592,6 +1608,15 @@ var _require = __webpack_require__(44),
 
 var axios = __webpack_require__(257);
 
+var link = {
+  color: '#000'
+};
+
+var button = {
+  display: 'inline-block',
+  float: 'right'
+};
+
 var UserPoll = function (_React$Component) {
   _inherits(UserPoll, _React$Component);
 
@@ -1628,22 +1653,22 @@ var UserPoll = function (_React$Component) {
         'div',
         null,
         React.createElement(
-          Link,
-          { to: '/details/' + this.props.userId + '/' + this.props._id },
+          'li',
+          null,
           React.createElement(
-            'li',
-            { className: 'mdl-list__item' },
+            Link,
+            { style: link, to: '/details/' + this.props.userId + '/' + this.props._id },
             React.createElement(
               'span',
-              { className: 'mdl-list__item-primary-content' },
+              null,
               this.props.name
             )
+          ),
+          React.createElement(
+            'button',
+            { style: button, onClick: this.handleClick },
+            'Delete Poll'
           )
-        ),
-        React.createElement(
-          'button',
-          { onClick: this.handleClick },
-          'Delete Poll'
         )
       );
     }

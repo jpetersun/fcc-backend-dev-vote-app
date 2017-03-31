@@ -1,6 +1,15 @@
 const React = require('react')
 const { Link } = require('react-router')
 const axios = require('axios')
+
+const link = {
+  color: '#000'
+}
+
+const button = {
+  display: 'inline-block',
+  float: 'right'
+}
 class UserPoll extends React.Component {
   constructor (props) {
     super(props)
@@ -24,14 +33,14 @@ class UserPoll extends React.Component {
   render () {
     return (
       <div>
-        <Link to={`/details/${this.props.userId}/${this.props._id}`}>
-          <li className='mdl-list__item'>
-            <span className='mdl-list__item-primary-content'>
+        <li>
+          <Link style={link} to={`/details/${this.props.userId}/${this.props._id}`}>
+            <span>
               {this.props.name}
             </span>
-          </li>
-        </Link>
-        <button onClick={this.handleClick}>Delete Poll</button>
+          </Link>
+          <button style={button} onClick={this.handleClick}>Delete Poll</button>
+        </li>
       </div>
     )
   }

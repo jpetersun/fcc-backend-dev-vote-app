@@ -105,7 +105,7 @@ var CreatePoll = function (_React$Component) {
           { onClick: this.renderOption },
           'Add Option'
         ),
-        React.createElement('input', { type: 'submit' })
+        React.createElement('input', { className: 'submit-btn', type: 'submit' })
       );
     }
   }]);

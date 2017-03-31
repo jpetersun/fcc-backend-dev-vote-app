@@ -13,22 +13,27 @@ const titleLink = {
 
 const content = {
   padding: '0 20px 0 20px',
-  maxWidth: '900px',
+  maxWidth: '600px',
   margin: '0 auto'
 }
 const navigation = {
-  textAlign: 'center'
+  textAlign: 'center',
+  display: 'flex',
+  flexDirection: 'column'
 }
 const navigationLink = {
   margin: '1rem',
-  display: 'block',
   color: '#999',
+  fontSize: '20px',
+  marginLeft: 'auto',
+  marginRight: 'auto',
+  maxWidth: '100%',
   textDecoration: 'none'
 }
 
 const menuIcon = {
   width: '40px',
-  position: 'absolute',
+  position: 'fixed',
   top: '2rem',
   right: '2rem'
 }

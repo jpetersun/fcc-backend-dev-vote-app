@@ -1,6 +1,23 @@
 const React = require('react')
 const UserPoll = require('./UserPoll')
 const axios = require('axios')
+
+const ul = {
+  listStyleType: 'none',
+  paddingLeft: '0'
+}
+
+const img = {
+  maxWidth: '50px',
+  display: 'block',
+  margin: '0 auto',
+  borderRadius: '50%'
+}
+
+const header = {
+  textAlign: 'center'
+}
+
 class Account extends React.Component {
   constructor (props) {
     super(props)
@@ -37,9 +54,9 @@ class Account extends React.Component {
     })
     return (
       <div>
-        <h4>{this.state.userData.name}</h4>
-        <img src={this.state.userData.avatar} alt='thing' />
-        <ul className='demo-list-item mdl-list'>
+        <img style={img} src={this.state.userData.avatar} alt='thing' />
+        <h4 style={header}>{this.state.userData.name}</h4>
+        <ul style={ul}>
           {polls.map((poll) => (
             <UserPoll {...poll} key={poll._id} />
           ))}
