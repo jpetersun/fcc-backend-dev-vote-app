@@ -54,7 +54,7 @@ class Account extends React.Component {
     })
     return (
       <div>
-        <img style={img} src={this.state.userData.avatar} alt='thing' />
+        <img style={img} src={this.state.userData.avatar} alt={this.state.userData.name}/>
         <h4 style={header}>{this.state.userData.name}</h4>
         <ul style={ul}>
           {polls.map((poll) => (

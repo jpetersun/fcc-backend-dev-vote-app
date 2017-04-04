@@ -87,7 +87,7 @@ var Account = function (_React$Component) {
       return React.createElement(
         'div',
         null,
-        React.createElement('img', { style: img, src: this.state.userData.avatar, alt: 'thing' }),
+        React.createElement('img', { style: img, src: this.state.userData.avatar, alt: this.state.userData.name }),
         React.createElement(
           'h4',
           { style: header },
