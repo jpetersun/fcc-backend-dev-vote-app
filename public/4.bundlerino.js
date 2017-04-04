@@ -11,7 +11,8 @@ var React = __webpack_require__(5);
 var Login = function Login(props) {
   return React.createElement(
     'a',
-    { href: '/auth/github' },
+    { className: 'auth-github', href: '/auth/github' },
+    React.createElement('img', { className: 'github-mark', src: '/public/icons/GitHub-Mark.png', alt: 'Github' }),
     'Login with GitHub'
   );
 };

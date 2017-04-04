@@ -16,19 +16,20 @@ const content = {
   maxWidth: '600px',
   margin: '0 auto'
 }
-const navigation = {
-  textAlign: 'center',
-  display: 'flex',
-  flexDirection: 'column'
-}
+// const navigation = {
+//   textAlign: 'center',
+//   display: 'flex',
+//   flexDirection: 'column'
+// }
 const navigationLink = {
-  margin: '1rem',
+  // margin: '1rem',
   color: '#999',
   fontSize: '20px',
   marginLeft: 'auto',
   marginRight: 'auto',
   maxWidth: '100%',
-  textDecoration: 'none'
+  textDecoration: 'none',
+  marginTop: '1rem'
 }
 
 const menuIcon = {
@@ -43,7 +44,7 @@ function Nav (props) {
     return null
   }
   return (
-    <nav style={navigation} className='navigation'>
+    <nav className='navigation-mobile'>
       <a style={navigationLink} href='/create-poll'>Create Poll</a>
       <a style={navigationLink} href='/account'>Account</a>
       <a style={navigationLink} href='/logout'>Logout</a>
@@ -70,7 +71,7 @@ class Layout extends React.Component {
     return (
       <div className='layout'>
         <header className='header'>
-          <div style={menuIcon}>
+          <div className='menu-icon' style={menuIcon}>
             <a onClick={this.handleIconClick} href='javascript:void(0)'>
               <MenuIcon />
             </a>
@@ -80,6 +81,11 @@ class Layout extends React.Component {
         <h1 style={title} className='layout-title'>
           <a style={titleLink} href='/'>Vote On It</a>
         </h1>
+        <nav className='navigation'>
+          <a href='/create-poll'>Create Poll</a>
+          <a href='/account'>Account</a>
+          <a href='/logout'>Logout</a>
+        </nav>
         <main className=''>
           <div style={content} className='content'>{this.props.children}</div>
         </main>

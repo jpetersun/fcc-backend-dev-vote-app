@@ -43,14 +43,13 @@ var Details = function (_React$Component) {
         labels: ['Red', 'Blue'],
         datasets: [{
           data: ['', ''],
-          backgroundColor: [_this.randyColor1, '#36A2EB']
+          backgroundColor: ['', '']
         }]
       }
     };
     _this.value = '';
     _this.handleChange = _this.handleChange.bind(_this);
     _this.handleSubmit = _this.handleSubmit.bind(_this);
-    _this.randyColors = [];
     return _this;
   }
 
@@ -83,11 +82,14 @@ var Details = function (_React$Component) {
           var votes = data.options.map(function (option) {
             return option.votes;
           });
+          var colors = data.options.map(function (option) {
+            return option.color;
+          });
           _this2.setState({ chartData: {
               labels: labels,
               datasets: [{
                 data: votes,
-                backgroundColor: _this2.randyColors
+                backgroundColor: colors
               }]
             }
           });
@@ -107,15 +109,14 @@ var Details = function (_React$Component) {
       axios.get('/polls/' + this.props.params.userId + '/' + this.props.params.id).then(function (response) {
         var data = response.data[0];
         // console.log(data)
-        for (var i = 0; i < data.options.length; i += 1) {
-          _this3.randyColors.push('#' + (Math.random() * 0xFFFFFF << 0).toString(16));
-        }
-        // console.log(this.randyColors)
         var labels = data.options.map(function (option) {
           return option.name;
         });
         var votes = data.options.map(function (option) {
           return option.votes;
+        });
+        var colors = data.options.map(function (option) {
+          return option.color;
         });
         var firstOption = data.options[0].name;
         _this3.value = firstOption;
@@ -124,7 +125,7 @@ var Details = function (_React$Component) {
             labels: labels,
             datasets: [{
               data: votes,
-              backgroundColor: _this3.randyColors
+              backgroundColor: colors
             }]
           }
         });
@@ -153,13 +154,13 @@ var Details = function (_React$Component) {
             ),
             React.createElement(
               'select',
-              { onChange: this.handleChange, name: 'selectpicker' },
+              { className: 'details__select', onChange: this.handleChange, name: 'selectpicker' },
               this.state.pollData.options.map(function (option) {
                 return React.createElement(PollOption, _extends({}, option, { key: option._id }));
               })
             )
           ),
-          React.createElement('input', { type: 'submit', value: 'Submit' })
+          React.createElement('input', { className: 'details__submit', type: 'submit', value: 'Submit' })
         )
       );
     }

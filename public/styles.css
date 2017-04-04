@@ -42,9 +42,36 @@ li {
   border-bottom: 1px solid #ccc;
   padding: 1rem 0;
 }
+.navigation {
+  text-align: center;
+  display: none;
+  flex-direction: column;
+}
+
+.navigation-mobile {
+  text-align: center;
+  flex-direction: column;
+  display: flex;
+}
 @media (min-width: 900px) {
   li {
     border: 0;
+  }
+
+}
+@media (min-width: 1200px) {
+  .menu-icon {
+    display: none;
+  }
+  .navigation {
+    display: list-item;
+  }
+  .navigation a {
+    margin-left: 1rem;
+    margin-right: 1rem;
+    color: #999;
+    font-size: 20px;
+    text-decoration: none;
   }
 }
 a {
@@ -64,4 +91,48 @@ li:before {
 select {
   margin-top: 1rem;
   margin-bottom: 1rem;
+}
+
+main {
+  margin-top: 1.5rem;
+}
+
+.github-mark {
+  max-width: 45px;
+  margin-right: 1rem;
+}
+
+.auth-github {
+  font-size: 1.5rem;
+  color: lightsteelblue;
+}
+
+.details__submit {
+  margin-top: 3rem;
+  background-color: steelblue;
+  border-radius: 4px;
+  border: 0;
+  color: #fff;
+  font-size: 1.5rem;
+  width: 150px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.details__select {
+  background-color: skyblue;
+  font-size: 1.3rem;
+  border: 0;
+}
+
+.details__select {
+  outline-color: deepskyblue;
+}
+
+#poll-name:focus {
+  outline-color: deepskyblue
+}
+
+.input__option:focus {
+  outline-color: skyblue;
 }

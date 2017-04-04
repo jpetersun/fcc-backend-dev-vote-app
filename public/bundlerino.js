@@ -13145,19 +13145,20 @@ var content = {
   maxWidth: '600px',
   margin: '0 auto'
 };
-var navigation = {
-  textAlign: 'center',
-  display: 'flex',
-  flexDirection: 'column'
-};
+// const navigation = {
+//   textAlign: 'center',
+//   display: 'flex',
+//   flexDirection: 'column'
+// }
 var navigationLink = {
-  margin: '1rem',
+  // margin: '1rem',
   color: '#999',
   fontSize: '20px',
   marginLeft: 'auto',
   marginRight: 'auto',
   maxWidth: '100%',
-  textDecoration: 'none'
+  textDecoration: 'none',
+  marginTop: '1rem'
 };
 
 var menuIcon = {
@@ -13173,7 +13174,7 @@ function Nav(props) {
   }
   return React.createElement(
     'nav',
-    { style: navigation, className: 'navigation' },
+    { className: 'navigation-mobile' },
     React.createElement(
       'a',
       { style: navigationLink, href: '/create-poll' },
@@ -13227,7 +13228,7 @@ var Layout = function (_React$Component) {
           { className: 'header' },
           React.createElement(
             'div',
-            { style: menuIcon },
+            { className: 'menu-icon', style: menuIcon },
             React.createElement(
               'a',
               { onClick: this.handleIconClick, href: 'javascript:void(0)' },
@@ -13243,6 +13244,25 @@ var Layout = function (_React$Component) {
             'a',
             { style: titleLink, href: '/' },
             'Vote On It'
+          )
+        ),
+        React.createElement(
+          'nav',
+          { className: 'navigation' },
+          React.createElement(
+            'a',
+            { href: '/create-poll' },
+            'Create Poll'
+          ),
+          React.createElement(
+            'a',
+            { href: '/account' },
+            'Account'
+          ),
+          React.createElement(
+            'a',
+            { href: '/logout' },
+            'Logout'
           )
         ),
         React.createElement(

@@ -28,8 +28,8 @@ class Details extends React.Component {
         datasets: [{
           data: ['', ''],
           backgroundColor: [
-            this.randyColor1,
-            '#36A2EB'
+            '',
+            ''
           ]
         }]
       }
@@ -37,7 +37,6 @@ class Details extends React.Component {
     this.value = ''
     this.handleChange = this.handleChange.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
-    this.randyColors = []
   }
 
   handleChange (event) {
@@ -61,12 +60,13 @@ class Details extends React.Component {
           const data = response.data[0]
           const labels = data.options.map(option => option.name)
           const votes = data.options.map(option => option.votes)
+          const colors = data.options.map(option => option.color)
           this.setState({chartData:
           {
             labels: labels,
             datasets: [{
               data: votes,
-              backgroundColor: this.randyColors
+              backgroundColor: colors
             }]
           }
           })
@@ -86,12 +86,9 @@ class Details extends React.Component {
       .then((response) => {
         const data = response.data[0]
         // console.log(data)
-        for (let i = 0; i < data.options.length; i += 1) {
-          this.randyColors.push('#' + (Math.random() * 0xFFFFFF << 0).toString(16))
-        }
-        // console.log(this.randyColors)
         const labels = data.options.map(option => option.name)
         const votes = data.options.map(option => option.votes)
+        const colors = data.options.map(option => option.color)
         const firstOption = data.options[0].name
         this.value = firstOption
         this.setState({ pollData: data })
@@ -100,7 +97,7 @@ class Details extends React.Component {
           labels: labels,
           datasets: [{
             data: votes,
-            backgroundColor: this.randyColors
+            backgroundColor: colors
           }]
         }
         })
@@ -117,13 +114,13 @@ class Details extends React.Component {
         <form onSubmit={this.handleSubmit} method='post' action='/poll-results'>
           <label>
             <p>Pick your favorite: {this.state.pollData.name}</p>
-            <select onChange={this.handleChange} name='selectpicker'>
+            <select className='details__select' onChange={this.handleChange} name='selectpicker'>
               {this.state.pollData.options.map((option) => (
                 <PollOption {...option} key={option._id} />
               ))}
             </select>
           </label>
-          <input type='submit' value='Submit' />
+          <input className='details__submit' type='submit' value='Submit' />
         </form>
       </div>
     )

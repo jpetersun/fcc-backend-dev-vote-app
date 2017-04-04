@@ -28,7 +28,8 @@ const optionSchema = mongoose.Schema({
     type: String,
     required: true
   },
-  votes: Number
+  votes: Number,
+  color: String
 })
 const pollSchema = mongoose.Schema({
   name: {
@@ -234,7 +235,8 @@ app.post('/create-poll', ensureAuthenticated, (req, res) => {
     req.body.values.forEach((value) => {
       options.push({
         name: value,
-        votes: 0
+        votes: 0,
+        color: '#' + (Math.random() * 0xFFFFFF << 0).toString(16)
       })
     })
     user.polls.push({
