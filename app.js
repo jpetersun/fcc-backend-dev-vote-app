@@ -148,8 +148,8 @@ function ensureAuthenticated(req, res, next) {
   res.redirect('/login')
 }
 
-mongoose.connect('mongodb://localhost:27017/vote-app')
-
+// mongoose.connect('mongodb://localhost:27017/vote-app')
+mongoose.connect('mongodb://jpeterson:something123@ds151450.mlab.com:51450/fcc-vote-app')
 
 app.delete('/user-poll/:userId/:id', (req, res) => {
   const theUser = User.findOne({ _id: req.params.userId })
