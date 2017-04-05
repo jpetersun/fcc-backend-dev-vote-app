@@ -1593,6 +1593,8 @@ module.exports = function spread(callback) {
 "use strict";
 
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -1612,33 +1614,98 @@ var link = {
   color: '#000'
 };
 
-var button = {
-  display: 'inline-block',
-  float: 'right'
-};
+var Warning = function (_React$Component) {
+  _inherits(Warning, _React$Component);
 
-var UserPoll = function (_React$Component) {
-  _inherits(UserPoll, _React$Component);
+  function Warning(props) {
+    _classCallCheck(this, Warning);
 
-  function UserPoll(props) {
-    _classCallCheck(this, UserPoll);
-
-    var _this = _possibleConstructorReturn(this, (UserPoll.__proto__ || Object.getPrototypeOf(UserPoll)).call(this, props));
+    var _this = _possibleConstructorReturn(this, (Warning.__proto__ || Object.getPrototypeOf(Warning)).call(this, props));
 
     _this.handleClick = _this.handleClick.bind(_this);
-    _this.userId = '';
-    _this.id = '';
+    _this.handleDelete = _this.handleDelete.bind(_this);
     return _this;
   }
 
-  _createClass(UserPoll, [{
+  _createClass(Warning, [{
     key: 'handleClick',
     value: function handleClick(e) {
-      axios.delete('/user-poll/' + this.userId + '/' + this._id).then(function (response) {
+      console.log(this.props);
+      console.log('clicked');
+    }
+  }, {
+    key: 'handleDelete',
+    value: function handleDelete(e) {
+      axios.delete('/user-poll/' + this.props.userId + '/' + this.props._id).then(function (response) {
         response;
       }).catch(function (error) {
         console.error('axios error', error);
       });
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      if (!this.props.warn) {
+        return null;
+      }
+      return React.createElement(
+        'div',
+        { className: 'warning' },
+        'Delete Poll?',
+        React.createElement(
+          'div',
+          null,
+          React.createElement(
+            'span',
+            { className: 'delete', onClick: this.handleDelete },
+            'Delete'
+          )
+        )
+      );
+    }
+  }]);
+
+  return Warning;
+}(React.Component);
+
+var UserPoll = function (_React$Component2) {
+  _inherits(UserPoll, _React$Component2);
+
+  function UserPoll(props) {
+    _classCallCheck(this, UserPoll);
+
+    var _this2 = _possibleConstructorReturn(this, (UserPoll.__proto__ || Object.getPrototypeOf(UserPoll)).call(this, props));
+
+    _this2.handleClick = _this2.handleClick.bind(_this2);
+    _this2.userId = '';
+    _this2.id = '';
+    _this2.state = {
+      showWarning: false
+    };
+    _this2.handleToggleClick = _this2.handleToggleClick.bind(_this2);
+    return _this2;
+  }
+
+  _createClass(UserPoll, [{
+    key: 'handleToggleClick',
+    value: function handleToggleClick() {
+      this.setState(function (prevState) {
+        return {
+          showWarning: !prevState.showWarning
+        };
+      });
+    }
+  }, {
+    key: 'handleClick',
+    value: function handleClick(e) {
+      // axios.delete(`/user-poll/${this.userId}/${this._id}`)
+      //   .then((response) => {
+      //     response
+      //   })
+      //   .catch((error) => {
+      //     console.error('axios error', error)
+      //   })
+      console.log('clicked');
     }
   }, {
     key: 'componentDidMount',
@@ -1651,7 +1718,8 @@ var UserPoll = function (_React$Component) {
     value: function render() {
       return React.createElement(
         'div',
-        null,
+        { className: 'user-poll' },
+        React.createElement(Warning, _extends({}, this.props, { warn: this.state.showWarning })),
         React.createElement(
           'li',
           null,
@@ -1664,10 +1732,14 @@ var UserPoll = function (_React$Component) {
               this.props.name
             )
           ),
-          React.createElement(
+          this.state.showWarning ? React.createElement(
             'button',
-            { style: button, onClick: this.handleClick },
-            'Delete Poll'
+            { className: 'user-poll__cancel', onClick: this.handleToggleClick },
+            'Cancel'
+          ) : React.createElement(
+            'button',
+            { className: 'user-poll__delete', onClick: this.handleToggleClick },
+            'Delete'
           )
         )
       );

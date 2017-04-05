@@ -102,7 +102,7 @@ var CreatePoll = function (_React$Component) {
         this.state.options,
         React.createElement(
           'button',
-          { onClick: this.renderOption },
+          { className: 'create-poll__add-btn', onClick: this.renderOption },
           'Add Option'
         ),
         React.createElement('input', { className: 'submit-btn', type: 'submit' })
