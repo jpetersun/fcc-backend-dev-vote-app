@@ -87,8 +87,6 @@ passport.use(new GitHubStrategy({
         return done(null, user);
       }
     });
-    //   return done(null, profile);
-    // });
   }
 ));
 
@@ -117,10 +115,6 @@ app.get('/account-details', ensureAuthenticated, function(req, res) {
   })
 });
 
-// app.get('/login', function(req, res){
-//   console.log(req.user)
-//   res.render('login', { user: req.user });
-// });
 
 app.get('/auth/github',
   passport.authenticate('github', { scope: [ 'user:email' ] }),
@@ -170,10 +164,6 @@ app.get('/polls', (req, res) => {
   users.then((user) => {
     res.send(user)
   })
-  // const polls = Poll.find({})
-  // polls.then((poll) => {
-  //   res.send(poll)
-  // })
 })
 
 app.get('/polls/:userId/:id', (req, res) => {
@@ -209,14 +199,6 @@ app.post('/poll-results/:userId/:id', (req, res) => {
       res.send(option)
     }
   })
-  // Poll.findById(req.params.id, (err, poll) => {
-  //   if (err) console.error(err)
-  //   const option = poll.options.id(req.body._id)
-  //   option.votes += 1
-
-  //   poll.save()
-  //   res.send(option)
-  // })
 })
 
 app.get('/create-poll', ensureAuthenticated, (req, res, next) => {
@@ -248,23 +230,6 @@ app.post('/create-poll', ensureAuthenticated, (req, res) => {
     })
   })
   res.redirect('/')
-
-  // let poll = new Poll({
-  //   name: req.body.poll.name,
-  //   options: [
-  //     {
-  //       name: req.body.poll.option1,
-  //       votes: 0
-  //     },
-  //     {
-  //       name: req.body.poll.option2,
-  //       votes: 0
-  //     }
-  //   ]
-  // })
-  // poll.save((err, poll) => {
-  //   if (err) return console.error(err)
-  // })
 })
 
 app.use((req, res) => {
@@ -282,17 +247,6 @@ app.use((req, res) => {
     }
   })
 })
-
-
-// app.post('/#/details/:id', (req, res) => {
-//   console.log('saved!')
-// })
-
-// const db = mongoose.connection
-// db.on('error', console.error.bind(console, 'connection error:'))
-// db.once('open', function() {
-//   console.log('we are in biz')
-// })
 
 console.log('listening on portorino ' + port)
 app.listen(port)
