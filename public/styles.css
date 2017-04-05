@@ -7,13 +7,12 @@ body {
 body {
   margin: 0;
   font-family:
+    sans-serif,
     -apple-system,
     BlinkMacSystemFont,
-    "Segoe UI"
     "Roboto",
     "Oxygen",
-    "Cantarell",
-    sans-serif;
+    "Cantarell";
   text-rendering: optimizeLegibility;
 }
 form {
