@@ -4,10 +4,7 @@
   "description": "A voting app for FreeCodeCamps Backend Certfication",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --require test/helpers/setup.js",
-    "lint": "standard",
-    "build": "webpack",
-    "watch": "webpack-dev-server"
+    "start": "node app.js"
   },
   "keywords": [],
   "author": "James peterson <jpeterson903@yahoo.com",
@@ -34,9 +31,11 @@
     "micro": "latest"
   },
   "devDependencies": {
-    "babel-core": "^6.23.1",
-    "babel-loader": "^6.3.0",
+    "babel-core": "^6.24.0",
+    "babel-loader": "^6.4.1",
+    "babel-plugin-lodash": "^3.2.11",
     "babel-polyfill": "^6.23.0",
+    "babel-preset-env": "^1.3.2",
     "babel-preset-es2015": "^6.22.0",
     "babel-preset-react": "^6.23.0",
     "babel-preset-stage-1": "^6.22.0",
@@ -48,16 +47,15 @@
     "eslint-config-standard-jsx": "^3.3.0",
     "eslint-config-standard-react": "^4.2.0",
     "eslint-loader": "^1.6.1",
+    "eslint-plugin-lodash": "^2.4.0",
     "eslint-plugin-promise": "^3.4.1",
     "eslint-plugin-react": "^6.9.0",
     "eslint-plugin-standard": "^2.0.1",
+    "lodash-webpack-plugin": "^0.11.2",
     "mocha": "^3.2.0",
     "style-loader": "^0.13.1",
-    "webpack": "^2.2.1",
+    "webpack": "^2.3.3",
     "webpack-dev-server": "^2.3.0",
     "webpack-livereload-plugin": "^0.10.0"
-  },
-  "scripts": {
-    "start": "node app.js"
   }
 }

@@ -1,5 +1,7 @@
+const webpack = require('webpack')
 const path = require('path')
 const LiveReloadPlugin = require('webpack-livereload-plugin')
+const LodashModuleReplacementPlugin = require('lodash-webpack-plugin')
 
 module.exports = {
   context: __dirname,
@@ -27,7 +29,11 @@ module.exports = {
         test: /\.jsx?$/,
         enforce: "pre",
         loader: "eslint-loader",
-        exclude: /node_modules/
+        exclude: /node_modules/,
+        'options': {
+          'plugins': ['lodash'],
+          'presets': [['env', { 'modules': false, 'targets': { 'node': 4 } }]]
+        }
       },
       {
         test: /\.jsx?$/,
@@ -40,6 +46,13 @@ module.exports = {
     ]
   },
   plugins: [
+    new webpack.DefinePlugin({
+      'process.env': {
+        NODE_ENV: JSON.stringify('production')
+      }
+    }),
+    new LodashModuleReplacementPlugin,
+    new webpack.optimize.UglifyJsPlugin,
     new LiveReloadPlugin()
   ]
 }
