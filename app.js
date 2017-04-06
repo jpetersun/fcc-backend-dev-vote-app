@@ -55,7 +55,8 @@ const User = mongoose.model('User', userSchema);
 passport.use(new GitHubStrategy({
     clientID: GITHUB_CLIENT_ID,
     clientSecret: GITHUB_CLIENT_SECRET,
-    callbackURL: "https://vote-app-jlstdpjbvz.now.sh/auth/github/callback"
+    // callbackURL: "https://vote-app-jlstdpjbvz.now.sh/auth/github/callback"
+    callbackURL: "http://127.0.0.1:3000/auth/github/callback"
   },
   function(accessToken, refreshToken, profile, done) {
     // asynchronous verification, for effect...
@@ -142,8 +143,8 @@ function ensureAuthenticated(req, res, next) {
   res.redirect('/login')
 }
 
-// mongoose.connect('mongodb://localhost:27017/vote-app')
-mongoose.connect('mongodb://jpeterson:something123@ds151450.mlab.com:51450/fcc-vote-app')
+mongoose.connect('mongodb://localhost:27017/vote-app')
+// mongoose.connect('mongodb://jpeterson:something123@ds151450.mlab.com:51450/fcc-vote-app')
 
 app.delete('/user-poll/:userId/:id', (req, res) => {
   const theUser = User.findOne({ _id: req.params.userId })
@@ -251,5 +252,4 @@ app.use((req, res) => {
 console.log('listening on portorino ' + port)
 app.listen(port)
 
-
-// currently at https://vote-app-jlstdpjbvz.now.sh/
+module.exports = app
