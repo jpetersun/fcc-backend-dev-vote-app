@@ -18,8 +18,6 @@ const session = require('express-session')
 const passport = require('passport')
 const GitHubStrategy = require('passport-github2').Strategy
 
-const GITHUB_CLIENT_ID = "5f05c2d5f34d08bed5b8";
-const GITHUB_CLIENT_SECRET = "080c7113b4430bfb74a781232d8f144a67acc837";
 const mongoose = require('mongoose')
 const ip = require('ip')
 
@@ -51,12 +49,12 @@ const userSchema = new mongoose.Schema({
 })
 const User = mongoose.model('User', userSchema);
 
-
+// console.log(process.env.CALLBACK_DEV)
 passport.use(new GitHubStrategy({
-    clientID: GITHUB_CLIENT_ID,
-    clientSecret: GITHUB_CLIENT_SECRET,
-    // callbackURL: "https://vote-app-jlstdpjbvz.now.sh/auth/github/callback"
-    callbackURL: "http://127.0.0.1:3000/auth/github/callback"
+    clientID: process.env.GITHUB_CLIENT_ID_DEV || process.env.GITHUB_CLIENT_ID,
+    clientSecret: process.env.GITHUB_CLIENT_SECRET_DEV || process.env.GITHUB_CLIENT_SECRET,
+    callbackURL: process.env.CALLBACK_DEV || "https://vote-on-it.now.sh/auth/github/callback"
+    // callbackURL: "http://127.0.0.1:3000/auth/github/callback"
   },
   function(accessToken, refreshToken, profile, done) {
     // asynchronous verification, for effect...
@@ -143,8 +141,8 @@ function ensureAuthenticated(req, res, next) {
   res.redirect('/login')
 }
 
-mongoose.connect('mongodb://localhost:27017/vote-app')
-// mongoose.connect('mongodb://jpeterson:something123@ds151450.mlab.com:51450/fcc-vote-app')
+mongoose.connect(process.env.DATABASE || 'mongodb://localhost:27017/vote-app')
+// console.log(process.env.DATABASE)
 
 app.delete('/user-poll/:userId/:id', (req, res) => {
   const theUser = User.findOne({ _id: req.params.userId })

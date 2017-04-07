@@ -1,10 +1,18 @@
 {
   "name": "vote-app",
   "version": "1.0.0",
-  "description": "A voting app for FreeCodeCamps Backend Certfication",
+  "description": "A voting app for FreeCodeCamp's Backend Certfication",
   "main": "index.js",
   "scripts": {
     "start": "node app.js"
+  },
+  "now": {
+    "alias": "vote-on-it",
+    "env": {
+      "DATABASE": "@database",
+      "GITHUB_CLIENT_ID": "@github-client-id",
+      "GITHUB_CLIENT_SECRET": "@github-client-secret"
+    }
   },
   "keywords": [],
   "author": "James peterson <jpeterson903@yahoo.com",
