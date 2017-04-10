@@ -126,7 +126,7 @@ app.delete('/user-poll/:userId/:id', (req, res) => {
     })
     user.polls = filteredPolls
     user.save()
-    res.end()
+    res.json(user.polls)
   })
 })
 
