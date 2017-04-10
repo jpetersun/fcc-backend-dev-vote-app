@@ -44,7 +44,6 @@ class CreatePoll extends React.Component {
 
   handleSubmit () {
     const inputs = Array.from(document.getElementsByClassName('input__option'))
-    console.log(inputs)
     const values = inputs.map(input => input.value)
     const name = document.getElementById('poll-name').value
     axios.post('/create-poll', {
@@ -52,6 +51,7 @@ class CreatePoll extends React.Component {
       values
     })
     .then((response) => {
+      window.location = '/'
     })
     .catch((error) => {
       console.log(error)

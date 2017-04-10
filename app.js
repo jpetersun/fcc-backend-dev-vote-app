@@ -210,7 +210,15 @@ app.get('/account', ensureAuthenticated, (req, res, next) => {
 
 app.post('/create-poll', ensureAuthenticated, (req, res) => {
   // console.log(req.body)
-  const theUser = User.findOne({ _id: req.user._id })
+  // console.log(req.body.user._id)
+  let id
+  if (req.body.user) {
+    id = req.body.user._id
+  } else {
+    id = req.user._id
+  }
+
+  const theUser = User.findOne({ _id: id})
   theUser.then((user) => {
     const options = []
     req.body.values.forEach((value) => {
@@ -220,15 +228,18 @@ app.post('/create-poll', ensureAuthenticated, (req, res) => {
         color: '#' + (Math.random() * 0xFFFFFF << 0).toString(16)
       })
     })
-    user.polls.push({
+    const newPoll = {
       name: req.body.name,
       options: options
-    })
+    }
+    user.polls.push(newPoll)
     user.save((err, user) => {
       if (err) return console.error(err)
     })
+    res.json(newPoll)
   })
-  res.redirect('/')
+  // res.redirect('/')
+  // res.json(newPoll)
 })
 
 app.use((req, res) => {
