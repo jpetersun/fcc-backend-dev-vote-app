@@ -20,34 +20,7 @@ const GitHubStrategy = require('passport-github2').Strategy
 
 const mongoose = require('mongoose')
 const ip = require('ip')
-
-const optionSchema = mongoose.Schema({
-  name: {
-    type: String,
-    required: true
-  },
-  votes: Number,
-  color: String
-})
-const pollSchema = mongoose.Schema({
-  name: {
-    type: String,
-    required: true
-  },
-  options: [optionSchema],
-  votersIpAddress: Array
-})
-const Poll = mongoose.model('Poll', pollSchema)
-const Option = mongoose.model('Option', optionSchema)
-
-// user
-const userSchema = new mongoose.Schema({
-  name: String,
-  someID: String,
-  avatar: String,
-  polls: [pollSchema],
-})
-const User = mongoose.model('User', userSchema);
+const User = require('./js/models/user')
 
 // console.log(process.env.CALLBACK_DEV)
 passport.use(new GitHubStrategy({
