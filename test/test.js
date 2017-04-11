@@ -84,39 +84,48 @@ describe('[USERS]', function(){
       .set('Accept', 'application/json')
       .end(function(err, res) {
         testUserQuery.then(user => {
+          // console.log(user)
           request(app)
             .delete(`/user-poll/${user._id}/${user.polls[0]._id}`)
             .end(function(err, res) {
               expect(res.body[0]).to.be.an('object')
+              expect(res.body[0].name).to.eql('Doggs')
               done()
           })
         })
       })
   })
 
-  //   it('should update a lion', function(done) {
-  //   request(app)
-  //     .post('/lions')
-  //     .send({
-  //       name: 'test lion',
-  //       age: 100,
-  //       pride: 'test lion',
-  //       gender:'female'
-  //     })
-  //     .set('Accept', 'application/json')
-  //     .end(function(err, res) {
-  //       const lion = res.body
-  //       request(app)
-  //         .put('/lions/' + lion.id)
-  //         .send({
-  //           name: 'new name'
-  //         })
-  //         .end(function(err, res) {
-  //           expect(res.body.name).to.equal('new name')
-  //           done()
-  //         })
-  //     })
-  // })
+  it('should update a poll', function(done) {
+    const testUserQuery = User.findOne({ someID: '12345'})
+    request(app)
+      .post('/create-poll')
+      .send({
+        user: {
+          _id: testUser._id,
+        },
+        name: 'Vegitables',
+        values: ['carerot', 'doneion', 'chabbage']
+      })
+      .set('Accept', 'application/json')
+      .end(function(err, res) {
+        testUserQuery.then(user => {
+          // console.log(user.polls[1].options)
+          // console.log(user.polls[1].options[0]._id)
+          request(app)
+            .post(`/poll-results/${user._id}/${user.polls[1]._id}`)
+            .send({
+              name: 'carerot',
+              _id: user.polls[0].options[0]._id
+            })
+            .end(function(err, res) {
+              expect(res.body.votes).to.equal(1)
+              done()
+            })
+        })
+      })
+  })
+
   after(() => {
     console.log('Deleting Test User')
     User.find().remove({ someID: '12345' }).exec()

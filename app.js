@@ -153,14 +153,16 @@ app.get('/polls/:userId/:id', (req, res) => {
 app.post('/poll-results/:userId/:id', (req, res) => {
   // console.log(req.params.id)
   // console.log(req.body)
+
   User.findById(req.params.userId, (err, user) => {
     if (err) console.error(err)
     const polls = user.polls
     const thePoll = polls.filter((item) => {
       return String(item._id) === req.params.id
     })
-    // console.log(thePoll)
-    const option = thePoll[0].options.id(req.body._id)
+    // console.log(thePoll[0].options)
+    // const option = thePoll[0].options.id(req.body._id)
+    const option = _.find(thePoll[0].options, {name: req.body.name})
     const poll = thePoll[0]
     if (poll.votersIpAddress.indexOf(ip.address()) >= 0) {
       res.send('You already voted')
