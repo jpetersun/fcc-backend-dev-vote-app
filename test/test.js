@@ -2,6 +2,8 @@ const app = require('../app')
 const request = require('supertest')
 const expect = require('chai').expect
 const User = require('../js/models/user')
+
+// Fake authentication
 app.request.isAuthenticated = function() {
   return true
 }

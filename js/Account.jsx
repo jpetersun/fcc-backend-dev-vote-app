@@ -1,5 +1,5 @@
 const React = require('react')
-const UserPoll = require('./UserPoll')
+const UserPolls = require('./UserPolls')
 const axios = require('axios')
 
 const ul = {
@@ -37,15 +37,17 @@ class Account extends React.Component {
         console.error('axios error', error)
       })
   }
-  componentDidUpdate () {
-    axios.get('/account-details')
-      .then((response) => {
-        this.setState({ userData: response.data })
-      })
-      .catch((error) => {
-        console.error('axios error', error)
-      })
-  }
+
+  // shouldComponentUpdate () {
+  //   axios.get('/account-details')
+  //     .then((response) => {
+  //       this.setState({ userData: response.data })
+  //     })
+  //     .catch((error) => {
+  //       console.error('axios error', error)
+  //     })
+  // }
+
   render () {
     const polls = []
     this.state.userData.polls.forEach((poll) => {
@@ -58,7 +60,7 @@ class Account extends React.Component {
         <h4 style={header}>{this.state.userData.name}</h4>
         <ul style={ul}>
           {polls.map((poll) => (
-            <UserPoll {...poll} key={poll._id} />
+            <UserPolls {...poll} key={poll._id} />
           ))}
         </ul>
       </div>

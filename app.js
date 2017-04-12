@@ -83,7 +83,7 @@ app.use(passport.session())
 app.get('/account-details', ensureAuthenticated, function(req, res) {
   const theUser = User.findOne({ someID: req.user.someID })
   theUser.then((user) => {
-    res.send(user)
+    res.json(user)
   })
 });
 

@@ -9,22 +9,18 @@ const link = {
 class Warning extends React.Component {
   constructor (props) {
     super(props)
-    this.handleClick = this.handleClick.bind(this)
     this.handleDelete = this.handleDelete.bind(this)
-  }
-  handleClick (e) {
-    console.log(this.props)
-    console.log('clicked')
   }
 
   handleDelete (e) {
     axios.delete(`/user-poll/${this.props.userId}/${this.props._id}`)
       .then((response) => {
-        response
+        return response
       })
       .catch((error) => {
         console.error('axios error', error)
       })
+    this.props.unmountMe()
   }
 
   render () {
@@ -33,7 +29,7 @@ class Warning extends React.Component {
     }
     return (
       <div className='warning'>
-        Delete Poll?
+        Delete Poll - {this.props.name}?
         <div>
           <span className='delete' onClick={this.handleDelete}>Delete</span>
         </div>
@@ -41,17 +37,20 @@ class Warning extends React.Component {
     )
   }
 }
-
-class UserPoll extends React.Component {
+class PollItem extends React.Component {
   constructor (props) {
     super(props)
-    this.handleClick = this.handleClick.bind(this)
     this.userId = ''
     this.id = ''
     this.state = {
-      showWarning: false
+      showWarning: false,
+      renderChild: true
     }
     this.handleToggleClick = this.handleToggleClick.bind(this)
+    this.handleChildUnmount = this.handleChildUnmount.bind(this)
+  }
+  handleChildUnmount () {
+    this.setState({ renderChild: false })
   }
 
   handleToggleClick () {
@@ -60,20 +59,15 @@ class UserPoll extends React.Component {
     }))
   }
 
-  handleClick (e) {
-    // axios.delete(`/user-poll/${this.userId}/${this._id}`)
-    //   .then((response) => {
-    //     response
-    //   })
-    //   .catch((error) => {
-    //     console.error('axios error', error)
-    //   })
-    console.log('clicked')
-  }
   componentDidMount () {
     this.userId = this.props.userId
     this._id = this.props._id
   }
+
+  dismiss() {
+    this.props.unmountMe()
+  }
+
   render () {
     return (
       <div className='user-poll'>
@@ -91,13 +85,34 @@ class UserPoll extends React.Component {
     )
   }
 }
+class UserPolls extends React.Component {
+  constructor (props) {
+    super(props)
+    this.state = {
+      renderChild: true
+    }
+    this.handleChildUnmount = this.handleChildUnmount.bind(this)
+  }
+
+  handleChildUnmount () {
+    this.setState({ renderChild: false })
+  }
+
+  render () {
+    return (
+      <div>
+        {this.state.renderChild ? <PollItem {...this.props} unmountMe={this.handleChildUnmount} /> : null}
+      </div>
+    )
+  }
+}
 
 const { string } = React.PropTypes
 
-UserPoll.propTypes = {
+UserPolls.propTypes = {
   name: string.isRequired,
   _id: string.isRequired,
   userId: string.isRequired
 }
 
-module.exports = UserPoll
+module.exports = UserPolls
