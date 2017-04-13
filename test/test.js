@@ -115,7 +115,7 @@ describe('[USERS]', function(){
           // console.log(user.polls[1].options)
           // console.log(user.polls[1].options[0]._id)
           request(app)
-            .post(`/poll-results/${user._id}/${user.polls[1]._id}`)
+            .put(`/poll-results/${user._id}/${user.polls[1]._id}`)
             .send({
               name: 'carerot',
               _id: user.polls[0].options[0]._id

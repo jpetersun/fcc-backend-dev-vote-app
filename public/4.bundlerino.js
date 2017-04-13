@@ -1,1 +1,1 @@
-webpackJsonp([4],{249:function(t,e,a){"use strict";var i=a(5),u=function(t){return i.createElement("a",{className:"auth-github",href:"/auth/github"},i.createElement("img",{className:"github-mark",src:"/public/icons/GitHub-Mark.png",alt:"Github"}),"Login with GitHub")};t.exports=u}});
+webpackJsonp([4],{237:function(t,e,a){"use strict";var i=a(4),u=function(t){return i.createElement("a",{className:"auth-github",href:"/auth/github"},i.createElement("img",{className:"github-mark",src:"/public/icons/GitHub-Mark.png",alt:"Github"}),"Login with GitHub")};t.exports=u}});

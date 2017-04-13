@@ -47,7 +47,7 @@ class Details extends React.Component {
     const obj = _.find(this.state.pollData.options, {name: value})
     const name = obj.name
     const id = obj._id
-    axios.post(`/poll-results/${this.props.params.userId}/${this.props.params.id}`, {
+    axios.put(`/poll-results/${this.props.params.userId}/${this.props.params.id}`, {
       name: name,
       _id: id
     })
@@ -111,7 +111,7 @@ class Details extends React.Component {
     return (
       <div>
         <Doughnut ref='canvas' data={this.state.chartData} />
-        <form onSubmit={this.handleSubmit} method='post' action='/poll-results'>
+        <form onSubmit={this.handleSubmit} method='put' action='/poll-results'>
           <label>
             <p>Pick your favorite: {this.state.pollData.name}</p>
             <select className='details__select' onChange={this.handleChange} name='selectpicker'>
