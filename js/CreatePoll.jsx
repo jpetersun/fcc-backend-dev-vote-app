@@ -1,29 +1,5 @@
 const React = require('react')
 const axios = require('axios')
-// class Option extends React.Component {
-//   constructor (props) {
-//     super(props)
-
-//     this.handleDelete = this.handleDelete.bind(this)
-//     this.pollName = 'poll' + (Math.floor(Math.random() * 1000) + Math.floor(Math.random() * 1000))
-//     this.state = {
-//       name: this.pollName
-//     }
-//   }
-
-//   handleDelete (e) {
-//     console.log('delete option')
-//   }
-
-//   render () {
-//     return (
-//       <div>
-//         <label>Option: <input type='text' /></label>
-//         <button onClick={this.handleDelete}>Delete</button>
-//       </div>
-//     )
-//   }
-// }
 
 class CreatePoll extends React.Component {
   constructor (props) {
@@ -71,4 +47,5 @@ class CreatePoll extends React.Component {
     )
   }
 }
+
 module.exports = CreatePoll

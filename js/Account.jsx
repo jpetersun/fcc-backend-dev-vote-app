@@ -28,6 +28,7 @@ class Account extends React.Component {
       }
     }
   }
+
   componentDidMount () {
     axios.get('/account-details')
       .then((response) => {
@@ -38,22 +39,14 @@ class Account extends React.Component {
       })
   }
 
-  // shouldComponentUpdate () {
-  //   axios.get('/account-details')
-  //     .then((response) => {
-  //       this.setState({ userData: response.data })
-  //     })
-  //     .catch((error) => {
-  //       console.error('axios error', error)
-  //     })
-  // }
-
   render () {
     const polls = []
+
     this.state.userData.polls.forEach((poll) => {
       poll.userId = this.state.userData._id
       polls.push(poll)
     })
+
     return (
       <div>
         <img style={img} src={this.state.userData.avatar} alt={this.state.userData.name} />

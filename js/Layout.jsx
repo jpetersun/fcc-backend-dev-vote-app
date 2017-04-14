@@ -50,7 +50,7 @@ function Nav (props) {
 }
 
 Nav.propTypes = {
-  show: bool
+  show: bool.isRequired
 }
 
 class Layout extends React.Component {
@@ -96,8 +96,7 @@ class Layout extends React.Component {
 }
 
 Layout.propTypes = {
-  children: element.isRequired,
-  show: bool.isRequired
+  children: element.isRequired
 }
 
 module.exports = Layout

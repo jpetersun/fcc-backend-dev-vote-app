@@ -1,7 +1,5 @@
 const React = require('react')
 const Layout = require('./Layout')
-// const Details = require('./Details')
-// const Landing = require('./Landing')
 const { Router, browserHistory } = require('react-router')
 
 if (typeof module !== 'undefined' && module.require) {

@@ -42,6 +42,7 @@ class Details extends React.Component {
   handleChange (event) {
     this.value = event.target.value
   }
+
   handleSubmit (event) {
     const value = this.value
     const obj = _.find(this.state.pollData.options, {name: value})

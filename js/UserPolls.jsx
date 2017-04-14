@@ -16,12 +16,11 @@ class Warning extends React.Component {
   handleDelete (e) {
     axios.delete(`/user-poll/${this.props.userId}/${this.props._id}`)
       .then((response) => {
-        return response
+        this.props.unmountMe()
       })
       .catch((error) => {
         console.error('axios error', error)
       })
-    this.props.unmountMe()
   }
 
   render () {
