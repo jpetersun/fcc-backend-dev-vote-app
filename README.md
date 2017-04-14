@@ -1,3 +1,3 @@
 # FCC-Vote-App
 
-## Mongo, Express, React, Now [zeit.co](https://zeit.co/now)
+## MongoDB, Express.js, React, Now - [zeit.co](https://zeit.co/now)
