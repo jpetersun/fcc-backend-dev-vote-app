@@ -37,17 +37,17 @@ passport.use(new GitHubStrategy({
       // represent the logged-in user.  In a typical application, you would want
       // to associate the GitHub account with a user record in your database,
       // and return that user instead.
-    var searchQuery = {
+    const searchQuery = {
       name: profile.displayName
     };
 
-    var updates = {
+    const updates = {
       name: profile.displayName,
       someID: profile.id,
       avatar: profile._json.avatar_url
     };
 
-    var options = {
+    const options = {
       upsert: true
     };
 
