@@ -5,6 +5,7 @@ const axios = require('axios')
 const link = {
   color: '#000'
 }
+const { string, func, bool } = React.PropTypes
 
 class Warning extends React.Component {
   constructor (props) {
@@ -37,6 +38,15 @@ class Warning extends React.Component {
     )
   }
 }
+
+Warning.propTypes = {
+  userId: string.isRequired,
+  _id: string.isRequired,
+  unmountMe: func.isRequired,
+  warn: bool.isRequired,
+  name: string.isRequired
+}
+
 class PollItem extends React.Component {
   constructor (props) {
     super(props)
@@ -64,7 +74,7 @@ class PollItem extends React.Component {
     this._id = this.props._id
   }
 
-  dismiss() {
+  dismiss () {
     this.props.unmountMe()
   }
 
@@ -85,6 +95,14 @@ class PollItem extends React.Component {
     )
   }
 }
+
+PollItem.propTypes = {
+  userId: string.isRequired,
+  _id: string.isRequired,
+  unmountMe: func.isRequired,
+  name: string.isRequired
+}
+
 class UserPolls extends React.Component {
   constructor (props) {
     super(props)
@@ -107,12 +125,11 @@ class UserPolls extends React.Component {
   }
 }
 
-const { string } = React.PropTypes
-
 UserPolls.propTypes = {
   name: string.isRequired,
   _id: string.isRequired,
-  userId: string.isRequired
+  userId: string.isRequired,
+  unmountMe: func.isRequired
 }
 
 module.exports = UserPolls

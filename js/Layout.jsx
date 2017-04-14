@@ -1,6 +1,8 @@
 const React = require('react')
 const MenuIcon = require('./MenuIcon')
 
+const { element, bool } = React.PropTypes
+
 const title = {
   textAlign: 'center',
   color: '#000'
@@ -16,13 +18,8 @@ const content = {
   maxWidth: '600px',
   margin: '0 auto'
 }
-// const navigation = {
-//   textAlign: 'center',
-//   display: 'flex',
-//   flexDirection: 'column'
-// }
+
 const navigationLink = {
-  // margin: '1rem',
   color: '#999',
   fontSize: '20px',
   marginLeft: 'auto',
@@ -40,7 +37,7 @@ const menuIcon = {
 }
 
 function Nav (props) {
-  if (!props.warn) {
+  if (!props.show) {
     return null
   }
   return (
@@ -52,18 +49,22 @@ function Nav (props) {
   )
 }
 
+Nav.propTypes = {
+  show: bool
+}
+
 class Layout extends React.Component {
   constructor (props) {
     super(props)
     this.handleIconClick = this.handleIconClick.bind(this)
     this.state = {
-      showWarning: false
+      showNav: false
     }
   }
 
   handleIconClick (e) {
     this.setState(prevState => ({
-      showWarning: !prevState.showWarning
+      showNav: !prevState.showNav
     }))
   }
 
@@ -76,7 +77,7 @@ class Layout extends React.Component {
               <MenuIcon />
             </a>
           </div>
-          <Nav warn={this.state.showWarning} />
+          <Nav show={this.state.showNav} />
         </header>
         <h1 style={title} className='layout-title'>
           <a style={titleLink} href='/'>Vote On It</a>
@@ -94,10 +95,9 @@ class Layout extends React.Component {
   }
 }
 
-const { element } = React.PropTypes
-
 Layout.propTypes = {
-  children: element.isRequired
+  children: element.isRequired,
+  show: bool.isRequired
 }
 
 module.exports = Layout
