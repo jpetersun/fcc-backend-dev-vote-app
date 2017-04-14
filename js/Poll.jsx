@@ -4,6 +4,7 @@ const { Link } = require('react-router')
 const linkStyle = {
   color: '#000'
 }
+
 const Poll = (props) => {
   return (
     <Link style={linkStyle} to={`/details/${props.userId}/${props._id}`}>

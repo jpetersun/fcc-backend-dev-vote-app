@@ -5,6 +5,7 @@ const axios = require('axios')
 const link = {
   color: '#000'
 }
+
 const { string, func, bool } = React.PropTypes
 
 class Warning extends React.Component {

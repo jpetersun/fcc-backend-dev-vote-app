@@ -8,6 +8,7 @@ if (typeof window === 'undefined') {
 }
 
 const Doughnut = require('react-chartjs-2').Doughnut
+
 class Details extends React.Component {
   constructor (props) {
     super(props)
@@ -134,4 +135,5 @@ Details.propTypes = {
   params: object,
   pollData: object
 }
+
 module.exports = Details

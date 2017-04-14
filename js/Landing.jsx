@@ -1,15 +1,13 @@
 const React = require('react')
 const Poll = require('./Poll')
-// const fakeData = require('../public/data.json')
-// console.log(fakeData)
-// const { object, arrayOf } = React.PropTypes
-// console.log(polls)
+
 const axios = require('axios')
 
 const ul = {
   listStyleType: 'none',
   paddingLeft: '0'
 }
+
 class Landing extends React.Component {
   constructor (props) {
     super(props)
@@ -18,6 +16,7 @@ class Landing extends React.Component {
       userData: []
     }
   }
+
   componentDidMount () {
     axios.get('/polls')
       .then((response) => {
@@ -27,6 +26,7 @@ class Landing extends React.Component {
         console.error('axios error', error)
       })
   }
+
   render () {
     const polls = []
     this.state.userData.forEach((user) => {
@@ -35,6 +35,7 @@ class Landing extends React.Component {
         polls.push(poll)
       })
     })
+
     return (
       <ul style={ul}>
         {polls.map((poll) => (

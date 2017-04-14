@@ -79,14 +79,17 @@ class Layout extends React.Component {
           </div>
           <Nav show={this.state.showNav} />
         </header>
+
         <h1 style={title} className='layout-title'>
           <a style={titleLink} href='/'>Vote On It</a>
         </h1>
+
         <nav className='navigation'>
           <a href='/create-poll'>Create Poll</a>
           <a href='/account'>Account</a>
           <a href='/logout'>Logout</a>
         </nav>
+
         <main className=''>
           <div style={content} className='content'>{this.props.children}</div>
         </main>
