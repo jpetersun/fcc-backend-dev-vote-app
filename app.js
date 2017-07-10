@@ -1,26 +1,27 @@
 require('babel-register')
 
-const express = require('express')
-const React = require('react')
-const ReactDOMServer = require('react-dom/server')
-const ReactRouter = require('react-router')
-const match = ReactRouter.match
-const RouterContext = ReactRouter.RouterContext
+import express from 'express'
+import React from 'react'
+import ReactDOMServer from 'react-dom/server'
+import { ReactRouter, match, RouterContext } from 'react-router'
+// const match = ReactRouter.match
+// const RouterContext = ReactRouter.RouterContext
 import _ from 'lodash'
-const fs = require('fs')
+import fs from 'fs'
 const port = 3000
 const baseTemplate = fs.readFileSync('./index.html')
 const template = _.template(baseTemplate)
-const ClientApp = require('./js/ClientApp.jsx')
+import ClientApp from './js/ClientApp.jsx'
 const Routes = ClientApp.Routes
-const bodyParser = require('body-parser')
-const session = require('express-session')
-const passport = require('passport')
-const GitHubStrategy = require('passport-github2').Strategy
+import bodyParser from 'body-parser'
+import session from 'express-session'
+import passport from 'passport'
+import passportgitHub2 from 'passport-github2'
+const GitHubStrategy = passportgitHub2.Strategy
 
-const mongoose = require('mongoose')
-const ip = require('ip')
-const User = require('./js/models/user')
+import mongoose from 'mongoose'
+import ip from 'ip'
+import User from './js/models/user'
 
 // console.log(process.env.CALLBACK_DEV)
 passport.use(new GitHubStrategy({
