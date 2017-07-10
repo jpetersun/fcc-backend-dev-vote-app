@@ -29,15 +29,16 @@ module.exports = {
         test: /\.jsx?$/,
         enforce: "pre",
         loader: "eslint-loader",
-        exclude: /node_modules/,
-        'options': {
-          'plugins': ['lodash'],
-          'presets': [['env', { 'modules': false, 'targets': { 'node': 4 } }]]
-        }
+        exclude: /node_modules/
       },
       {
-        test: /\.jsx?$/,
-        loader: 'babel-loader',
+        'loader': 'babel-loader',
+        'test': /\.jsx?$/,
+        'exclude': /node_modules/,
+        'query': {
+          'plugins': ['lodash'],
+          'presets': [['env', { 'targets': { 'node': 4 } }]]
+        }
       },
       {
         test: /\.css$/,
