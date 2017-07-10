@@ -27,6 +27,7 @@
     "express-sessions": "^1.0.6",
     "ip": "^1.1.5",
     "lodash": "^4.17.4",
+    "micro": "latest",
     "mongodb": "^2.2.23",
     "mongoose": "^4.8.2",
     "node-ensure": "0.0.0",
@@ -37,7 +38,7 @@
     "react-chartjs-2": "^2.0.5",
     "react-dom": "^15.4.2",
     "react-router": "^2.0.1",
-    "micro": "latest"
+    "sanitizer": "^0.1.3"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
