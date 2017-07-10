@@ -6,7 +6,7 @@ const ReactDOMServer = require('react-dom/server')
 const ReactRouter = require('react-router')
 const match = ReactRouter.match
 const RouterContext = ReactRouter.RouterContext
-const _ = require('lodash')
+import _ from 'lodash'
 const fs = require('fs')
 const port = 3000
 const baseTemplate = fs.readFileSync('./index.html')
