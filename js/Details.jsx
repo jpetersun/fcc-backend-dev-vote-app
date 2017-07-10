@@ -1,7 +1,7 @@
 const React = require('react')
 const PollOption = require('./PollOption')
 const axios = require('axios')
-import _ from 'lodash'
+const _ = require('lodash')
 
 if (typeof window === 'undefined') {
   global.window = {}
