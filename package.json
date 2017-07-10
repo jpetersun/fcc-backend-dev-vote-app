@@ -4,7 +4,8 @@
   "description": "A voting app for FreeCodeCamp's Backend Certfication",
   "main": "index.js",
   "scripts": {
-    "start": "babel-node app.js"
+    "start": "babel-node app.js",
+    "test": "mocha --compilers js:babel-core/register test/test.js"
   },
   "now": {
     "alias": "vote-on-it",
