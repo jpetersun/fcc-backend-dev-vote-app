@@ -17,6 +17,7 @@ const bodyParser = require('body-parser')
 const session = require('express-session')
 const passport = require('passport')
 const GitHubStrategy = require('passport-github2').Strategy
+const sanitizer = require('sanitizer')
 
 const mongoose = require('mongoose')
 const ip = require('ip')
@@ -193,9 +194,16 @@ app.post('/create-poll', ensureAuthenticated, (req, res) => {
     id = req.user._id
   }
 
+
   const theUser = User.findOne({ _id: id})
   theUser.then((user) => {
     const options = []
+
+    // Sanitize user input
+    req.body.values = req.body.values.map(value => {
+      return sanitizer.sanitize(value)
+    })
+
     req.body.values.forEach((value) => {
       options.push({
         name: value,
@@ -203,8 +211,9 @@ app.post('/create-poll', ensureAuthenticated, (req, res) => {
         color: '#' + (Math.random() * 0xFFFFFF << 0).toString(16)
       })
     })
+
     const newPoll = {
-      name: req.body.name,
+      name: sanitizer.sanitize(req.body.name),
       options: options
     }
     user.polls.push(newPoll)
