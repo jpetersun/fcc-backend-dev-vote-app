@@ -6,7 +6,7 @@ const ReactDOMServer = require('react-dom/server')
 const ReactRouter = require('react-router')
 const match = ReactRouter.match
 const RouterContext = ReactRouter.RouterContext
-import _ from 'lodash'
+const _ = require('lodash')
 const fs = require('fs')
 const port = 3000
 const baseTemplate = fs.readFileSync('./index.html')
@@ -22,56 +22,57 @@ const sanitizer = require('sanitizer')
 const mongoose = require('mongoose')
 const ip = require('ip')
 const User = require('./js/models/user')
+const routes = require('./js/routes/index')
 
-// console.log(process.env.CALLBACK_DEV)
-passport.use(new GitHubStrategy({
-    clientID: process.env.GITHUB_CLIENT_ID_DEV || process.env.GITHUB_CLIENT_ID,
-    clientSecret: process.env.GITHUB_CLIENT_SECRET_DEV || process.env.GITHUB_CLIENT_SECRET,
-    callbackURL: process.env.CALLBACK_DEV || "https://vote-on-it.now.sh/auth/github/callback"
-    // callbackURL: "http://127.0.0.1:3000/auth/github/callback"
-  },
-  function(accessToken, refreshToken, profile, done) {
-    // asynchronous verification, for effect...
-    // process.nextTick(function () {
+// passport.use(new GitHubStrategy({
+//     clientID: process.env.GITHUB_CLIENT_ID_DEV || process.env.GITHUB_CLIENT_ID,
+//     clientSecret: process.env.GITHUB_CLIENT_SECRET_DEV || process.env.GITHUB_CLIENT_SECRET,
+//     callbackURL: process.env.CALLBACK_DEV || "https://vote-on-it.now.sh/auth/github/callback"
+//     // callbackURL: "http://127.0.0.1:3000/auth/github/callback"
+//   },
+//   function(accessToken, refreshToken, profile, done) {
+//     // asynchronous verification, for effect...
+//     // process.nextTick(function () {
 
-      // To keep the example simple, the user's GitHub profile is returned to
-      // represent the logged-in user.  In a typical application, you would want
-      // to associate the GitHub account with a user record in your database,
-      // and return that user instead.
-    const searchQuery = {
-      name: profile.displayName
-    };
+//       // To keep the example simple, the user's GitHub profile is returned to
+//       // represent the logged-in user.  In a typical application, you would want
+//       // to associate the GitHub account with a user record in your database,
+//       // and return that user instead.
+//     const searchQuery = {
+//       name: profile.displayName
+//     };
 
-    const updates = {
-      name: profile.displayName,
-      someID: profile.id,
-      avatar: profile._json.avatar_url
-    };
+//     const updates = {
+//       name: profile.displayName,
+//       someID: profile.id,
+//       avatar: profile._json.avatar_url
+//     };
 
-    const options = {
-      upsert: true
-    };
+//     const options = {
+//       upsert: true
+//     };
 
-    // update the user if s/he exists or add a new user
-    User.findOneAndUpdate(searchQuery, updates, options, function(err, user) {
-      if(err) {
-        return done(err);
-      } else {
-        return done(null, user);
-      }
-    });
-  }
-));
+//     // update the user if s/he exists or add a new user
+//     User.findOneAndUpdate(searchQuery, updates, options, function(err, user) {
+//       if(err) {
+//         return done(err);
+//       } else {
+//         return done(null, user);
+//       }
+//     });
+//   }
+// ));
 
-passport.serializeUser(function(user, done) {
-  done(null, user.id);
-});
+// passport.serializeUser(function(user, done) {
+//   done(null, user.id);
+// });
 
-passport.deserializeUser(function(id, done) {
-  User.findById(id, function (err, user) {
-    done(err, user);
-  });
-});
+// passport.deserializeUser(function(id, done) {
+//   User.findById(id, function (err, user) {
+//     done(err, user);
+//   });
+// });
+
 const app = express()
 
 app.use('/public', express.static('./public'))
@@ -81,7 +82,9 @@ app.use(session({ secret: 'keyboard cat', resave: false, saveUninitialized: fals
 app.use(passport.initialize())
 app.use(passport.session())
 
-app.get('/account-details', ensureAuthenticated, function(req, res) {
+app.use('/', routes)
+
+app.get('/account-details', routes.ensureAuthenticated, function(req, res) {
   const theUser = User.findOne({ someID: req.user.someID })
   theUser.then((user) => {
     res.json(user)
@@ -89,31 +92,31 @@ app.get('/account-details', ensureAuthenticated, function(req, res) {
 });
 
 
-app.get('/auth/github',
-  passport.authenticate('github', { scope: [ 'user:email' ] }),
-  function(req, res){
-    // The request will be redirected to GitHub for authentication, so this
-    // function will not be called.
-  });
+// app.get('/auth/github',
+//   passport.authenticate('github', { scope: [ 'user:email' ] }),
+//   function(req, res){
+//     // The request will be redirected to GitHub for authentication, so this
+//     // function will not be called.
+//   });
 
-app.get('/auth/github/callback',
-  passport.authenticate('github', { failureRedirect: '/login' }),
-  function(req, res) {
-    // console.log(req.user)
-    res.redirect(req.session.returnTo || '/')
-    delete req.session.returnTo
-  });
+// app.get('/auth/github/callback',
+//   passport.authenticate('github', { failureRedirect: '/login' }),
+//   function(req, res) {
+//     // console.log(req.user)
+//     res.redirect(req.session.returnTo || '/')
+//     delete req.session.returnTo
+//   });
 
-app.get('/logout', function(req, res){
-  req.logout();
-  res.redirect('/');
-});
+// app.get('/logout', function(req, res){
+//   req.logout();
+//   res.redirect('/');
+// });
 
-function ensureAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) { return next(); }
-  req.session.returnTo = req.path
-  res.redirect('/login')
-}
+// function ensureAuthenticated(req, res, next) {
+//   if (req.isAuthenticated()) { return next(); }
+//   req.session.returnTo = req.path
+//   res.redirect('/login')
+// }
 
 mongoose.connect(process.env.DATABASE || 'mongodb://localhost:27017/vote-app')
 // console.log(process.env.DATABASE)
@@ -176,15 +179,15 @@ app.put('/poll-results/:userId/:id', (req, res) => {
   })
 })
 
-app.get('/create-poll', ensureAuthenticated, (req, res, next) => {
+app.get('/create-poll', routes.ensureAuthenticated, (req, res, next) => {
   next()
 })
 
-app.get('/account', ensureAuthenticated, (req, res, next) => {
+app.get('/account', routes.ensureAuthenticated, (req, res, next) => {
   next()
 })
 
-app.post('/create-poll', ensureAuthenticated, (req, res) => {
+app.post('/create-poll', routes.ensureAuthenticated, (req, res) => {
   // console.log(req.body)
   // console.log(req.body.user._id)
   let id

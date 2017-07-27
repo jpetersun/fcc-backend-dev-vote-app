@@ -15,6 +15,7 @@ body {
     "Cantarell";
   text-rendering: optimizeLegibility;
 }
+
 form {
   margin: 0 auto;
   max-width: 400px;
@@ -27,9 +28,11 @@ form {
   display: block;
   margin: 1rem 0;
 }
+
 #poll-name {
   border: 1px solid skyblue;
 }
+
 .submit-btn {
   border: 1px solid #000;
   margin-top: 2rem;
@@ -44,9 +47,11 @@ form {
   padding: 0.5rem;
   outline-color: #96c8da;
 }
+
 button {
   border: 1px solid #000;
 }
+
 li {
   border-bottom: 1px solid #ccc;
   padding: 1rem 0;
@@ -62,21 +67,26 @@ li {
   flex-direction: column;
   display: flex;
 }
+
 @media (min-width: 900px) {
   li {
     border: 0;
   }
 }
+
 @media (min-width: 1200px) {
   .navigation-mobile {
     display: none;
   }
+
   .menu-icon {
     display: none;
   }
+
   .navigation {
     display: list-item;
   }
+
   .navigation a {
     margin-left: 1rem;
     margin-right: 1rem;
@@ -85,6 +95,7 @@ li {
     text-decoration: none;
   }
 }
+
 a {
   text-decoration: none;
 }
@@ -108,14 +119,27 @@ main {
   margin-top: 1.5rem;
 }
 
-.github-mark {
+.github-mark,
+.twitter-mark,
+.google-mark {
   max-width: 45px;
   margin-right: 1rem;
 }
 
-.auth-github {
+.auth-github,
+.auth-twitter,
+.auth-google {
   font-size: 1.5rem;
   color: grey;
+}
+
+.auth-link {
+  margin-bottom: 1.5rem;
+}
+
+.login-wrapper {
+  display: flex;
+  flex-direction: column;
 }
 
 .details__submit {
@@ -189,6 +213,7 @@ main {
   border-color: #fff;
   padding: 0.25rem;
 }
+
 .user-poll__delete:focus,
 .user-poll__cancel:focus {
   outline: none;
@@ -201,6 +226,7 @@ main {
   color: #E91E63;
   max-width: 70px;
 }
+
 .warning {
   background-color: #fafafa;
   text-align: center;
@@ -216,4 +242,3 @@ main {
 .warning__cancel {
   margin-left: 2rem;
 }
-
