@@ -135,6 +135,3 @@ describe('[USERS]', function(){
     User.find().remove({ someID: '12345' }).exec()
   })
 })
-
-
-
