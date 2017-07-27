@@ -9,6 +9,4 @@ const optionSchema = mongoose.Schema({
   color: String
 })
 
-const Option = mongoose.model('Option', optionSchema)
-
 module.exports = optionSchema

@@ -10,6 +10,4 @@ const pollSchema = mongoose.Schema({
   votersIpAddress: Array
 })
 
-const Poll = mongoose.model('Poll', pollSchema)
-
 module.exports = pollSchema

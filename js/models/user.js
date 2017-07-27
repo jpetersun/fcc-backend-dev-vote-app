@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
   name: String,
   someID: String,
   avatar: String,
-  polls: [pollSchema],
+  polls: [pollSchema]
 })
 
 const User = mongoose.model('User', userSchema)
