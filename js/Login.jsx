@@ -12,7 +12,7 @@ const Login = (props) => {
         </a>
       </div>
       <div className='auth-link'>
-        <a className='auth-twitter' href='/auth/twitter'>
+        <a href='/auth/twitter'>
           <img className='twitter-mark' src='/public/icons/twitter-icon.png' alt='Twitter' />
         </a>
         <a className='auth-twitter' href='/auth/twitter'>
@@ -20,7 +20,7 @@ const Login = (props) => {
         </a>
       </div>
       <div className='auth-link'>
-        <a className='auth-google' href='/auth/google'>
+        <a href='/auth/google'>
           <img className='google-mark' src='/public/icons/google-mark.png' alt='Google' />
         </a>
         <a className='auth-google' href='/auth/google'>
