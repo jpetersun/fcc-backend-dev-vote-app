@@ -120,10 +120,12 @@ main {
 }
 
 .github-mark,
-.twitter-mark,
 .google-mark {
   max-width: 45px;
-  margin-right: 1rem;
+}
+
+.twitter-mark {
+  max-width: 70px;
 }
 
 .auth-github,
@@ -131,10 +133,14 @@ main {
 .auth-google {
   font-size: 1.5rem;
   color: grey;
+  margin-top: 0.5rem;
 }
 
 .auth-link {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .login-wrapper {
