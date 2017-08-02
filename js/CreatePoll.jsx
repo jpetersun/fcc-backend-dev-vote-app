@@ -1,5 +1,6 @@
 const React = require('react')
 const axios = require('axios')
+
 const inputStyle = {
   display: 'flex',
   flexDirection: 'row',
@@ -47,7 +48,7 @@ class UserInput extends React.Component {
 class CreatePoll extends React.Component {
   constructor (props) {
     super(props)
-    this.state = {options: [], submitOptions: []}
+    this.state = {options: []}
 
     this.renderOption = this.renderOption.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
