@@ -256,3 +256,21 @@ main {
 .warning__cancel {
   margin-left: 2rem;
 }
+
+.user-input-enter {
+  opacity: 0.01;
+}
+
+.user-input-enter.user-input-enter-active {
+  opacity: 1;
+  transition: opacity 500ms ease-in;
+}
+
+.user-input-leave {
+  opacity: 1;
+}
+
+.user-input-leave.user-input-leave-active {
+  opacity: 0.01;
+  transition: opacity 300ms ease-in;
+}

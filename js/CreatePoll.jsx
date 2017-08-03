@@ -1,6 +1,6 @@
 const React = require('react')
 const axios = require('axios')
-
+const ReactCSSTransitionGroup = require('react-addons-css-transition-group')
 const inputStyle = {
   display: 'flex',
   flexDirection: 'row',
@@ -16,9 +16,15 @@ class UserInput extends React.Component {
     super(props)
 
     this.removeOption = this.removeOption.bind(this)
+    this.handleChange = this.handleChange.bind(this)
     this.state = {
-      display: true
+      display: true,
+      value: ''
     }
+  }
+
+  handleChange (event) {
+    this.setState({value: event.target.value})
   }
 
   removeOption (e) {
@@ -33,14 +39,11 @@ class UserInput extends React.Component {
       return null
     }
 
-    const randyKey = String((Math.floor(Math.random() * 1000) + Math.floor(Math.random() * 1000)))
-    const randyName = 'option' + randyKey
-
+    // const randyKey = String((Math.floor(Math.random() * 1000) + Math.floor(Math.random() * 1000)))
+    // const randyName = 'option' + randyKey
+    // <button onClick={this.removeOption} style={deleteButtonStyle} className='delete-option'>Delete</button>
     return (
-      <div key={randyKey} name={randyName} style={inputStyle}>
-        <input required className='input__option' type='text' />
-        <button onClick={this.removeOption} style={deleteButtonStyle} className='delete-option'>Delete</button>
-      </div>
+      <input required className='input__option' type='text' value={this.state.value} onChange={this.handleChange} />
     )
   }
 }
@@ -57,8 +60,15 @@ class CreatePoll extends React.Component {
   renderOption (e) {
     e.preventDefault()
     const optionState = this.state.options
-    optionState.push(<UserInput />)
+    const randyKey = String((Math.floor(Math.random() * 1000) + Math.floor(Math.random() * 1000)))
+    optionState.push(<UserInput key={randyKey} />)
     this.setState({options: optionState})
+  }
+
+  handleRemove (i) {
+    let newItems = this.state.options.slice()
+    newItems.splice(i, 1)
+    this.setState({options: newItems})
   }
 
   handleSubmit (e) {
@@ -81,13 +91,26 @@ class CreatePoll extends React.Component {
   }
 
   render () {
+    const options = this.state.options.map((option, i) => {
+      return (
+        <div key={option.key} style={inputStyle}>
+          {option}
+          <span onClick={() => this.handleRemove(i)} style={deleteButtonStyle} className='delete-option'>Delete</span>
+        </div>
+      )
+    })
     return (
       <form onSubmit={this.handleSubmit} method='post' action='/create-poll'>
         <p>Create A Poll</p>
         <label>Name: <input required type='text' id='poll-name' /></label>
         <input required className='input__option--default' type='text' />
         <input required className='input__option--default' type='text' />
-        {this.state.options}
+        <ReactCSSTransitionGroup
+          transitionName='user-input'
+          transitionEnterTimeout={500}
+          transitionLeaveTimeout={300}>
+          {options}
+        </ReactCSSTransitionGroup>
         <button className='create-poll__add-btn' onClick={this.renderOption}>Add Option</button>
         <input className='submit-btn' type='submit' />
       </form>
