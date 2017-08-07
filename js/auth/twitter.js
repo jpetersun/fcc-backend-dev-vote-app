@@ -12,7 +12,7 @@ passport.use(new TwitterStrategy({
     callbackURL: config.twitter.callbackURL
   },
 
-  function(accessToken, refreshToken, profile, done) {
+  (accessToken, refreshToken, profile, done) => {
     const searchQuery = {
       name: profile.displayName
     }
@@ -28,7 +28,7 @@ passport.use(new TwitterStrategy({
     }
 
     // update the user if s/he exists or add a new user
-    User.findOneAndUpdate(searchQuery, updates, options, function(err, user) {
+    User.findOneAndUpdate(searchQuery, updates, options, (err, user) => {
       if (err) {
         return done(err)
       } else {

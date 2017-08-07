@@ -11,7 +11,7 @@ passport.use(new GoogleStrategy({
     clientSecret: config.google.clientSecret,
     callbackURL: config.google.callbackURL
   },
-  function(accessToken, refreshToken, profile, done) {
+  (accessToken, refreshToken, profile, done) => {
     // asynchronous verification, for effect...
     // process.nextTick(function () {
 
@@ -30,7 +30,7 @@ passport.use(new GoogleStrategy({
     }
 
     // update the user if s/he exists or add a new user
-    User.findOneAndUpdate(searchQuery, updates, options, function(err, user) {
+    User.findOneAndUpdate(searchQuery, updates, options, (err, user) => {
       if(err) {
         return done(err)
       } else {
