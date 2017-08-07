@@ -1,4 +1,4 @@
-const passport = require('passport')
+import passport from 'passport'
 const TwitterStrategy = require('passport-twitter').Strategy
 
 const User = require('../models/user')

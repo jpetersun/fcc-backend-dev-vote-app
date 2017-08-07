@@ -1,10 +1,9 @@
-const passport = require('passport')
+import passport from 'passport'
 const GitHubStrategy = require('passport-github2').Strategy
 
 const User = require('../models/user')
 import { config } from './config'
 const init = require('./init')
-console.log(config)
 
 passport.use(new GitHubStrategy({
     clientID: config.github.clientID,
