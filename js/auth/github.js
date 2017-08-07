@@ -1,7 +1,7 @@
 import passport from 'passport'
 import { Strategy as GitHubStrategy } from 'passport-github2'
 
-const User = require('../models/user')
+import { User } from '../models/user'
 import { config } from './config'
 const init = require('./init')
 

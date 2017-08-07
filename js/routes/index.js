@@ -3,7 +3,7 @@ const router = express.Router()
 const authRouter = require('./index-auth')
 
 const ip = require('ip')
-const User = require('../models/user')
+import { User } from '../models/user'
 const sanitizer = require('sanitizer')
 const _ = require('lodash')
 

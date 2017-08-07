@@ -8,6 +8,4 @@ const userSchema = new mongoose.Schema({
   polls: [pollSchema]
 })
 
-const User = mongoose.model('User', userSchema)
-
-module.exports = User
+export const User = mongoose.model('User', userSchema)

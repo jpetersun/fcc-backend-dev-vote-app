@@ -3,7 +3,7 @@ import 'babel-polyfill'
 const app = require('../app')
 const request = require('supertest')
 const expect = require('chai').expect
-const User = require('../js/models/user')
+import { User } from '../js/models/user'
 
 // Fake authentication
 app.request.isAuthenticated = function() {
