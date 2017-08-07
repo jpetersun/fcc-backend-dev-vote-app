@@ -1,6 +1,6 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
 
-const optionSchema = mongoose.Schema({
+export const optionSchema = mongoose.Schema({
   name: {
     type: String,
     required: true
@@ -8,5 +8,3 @@ const optionSchema = mongoose.Schema({
   votes: Number,
   color: String
 })
-
-module.exports = optionSchema

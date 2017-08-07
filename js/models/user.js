@@ -1,5 +1,5 @@
-const mongoose = require('mongoose')
-const pollSchema = require('./poll')
+import mongoose from 'mongoose'
+import { pollSchema } from './poll'
 
 const userSchema = new mongoose.Schema({
   name: String,

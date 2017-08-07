@@ -1,7 +1,7 @@
-const mongoose = require('mongoose')
-const optionSchema = require('./option')
+import mongoose from 'mongoose'
+import { optionSchema } from './option'
 
-const pollSchema = mongoose.Schema({
+export const pollSchema = mongoose.Schema({
   name: {
     type: String,
     required: true
@@ -9,5 +9,3 @@ const pollSchema = mongoose.Schema({
   options: [optionSchema],
   votersIpAddress: Array
 })
-
-module.exports = pollSchema
