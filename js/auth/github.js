@@ -3,7 +3,7 @@ import { Strategy as GitHubStrategy } from 'passport-github2'
 
 import { User } from '../models/user'
 import { config } from './config'
-const init = require('./init')
+import init from './init'
 
 passport.use(new GitHubStrategy({
     clientID: config.github.clientID,
@@ -47,4 +47,4 @@ passport.use(new GitHubStrategy({
 // serialize user into the session
 init()
 
-module.exports = passport
+export default passport

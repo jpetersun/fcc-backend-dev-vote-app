@@ -3,7 +3,8 @@ import { Strategy as TwitterStrategy } from 'passport-twitter'
 
 import { User } from '../models/user'
 import { config } from './config'
-const init = require('./init')
+import init from './init'
+
 
 passport.use(new TwitterStrategy({
     consumerKey: config.twitter.consumerKey,
@@ -41,4 +42,4 @@ passport.use(new TwitterStrategy({
 // serialize user into the session
 init()
 
-module.exports = passport
+export default passport

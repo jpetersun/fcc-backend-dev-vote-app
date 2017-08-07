@@ -2,7 +2,7 @@ import passport from 'passport'
 import { User } from '../models/user'
 
 
-module.exports = function() {
+export default () => {
   passport.serializeUser(function(user, done) {
     done(null, user.id)
   })

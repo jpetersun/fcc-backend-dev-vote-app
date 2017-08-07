@@ -1,9 +1,9 @@
 const express = require('express')
 const authRouter = express.Router()
 
-const passportGithub = require('../auth/github')
-const passportTwitter = require('../auth/twitter')
-const passportGoogle = require('../auth/google')
+import passportGithub from '../auth/github'
+import passportTwitter from '../auth/twitter'
+import passportGoogle from '../auth/google'
 
 authRouter.ensureAuthenticated = function (req, res, next) {
   if (req.isAuthenticated()) { return next() }

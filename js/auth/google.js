@@ -3,7 +3,8 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20'
 
 import { User } from '../models/user'
 import { config } from './config'
-const init = require('./init')
+import init from './init'
+
 
 passport.use(new GoogleStrategy({
     clientID: config.google.clientID,
@@ -42,4 +43,4 @@ passport.use(new GoogleStrategy({
 // serialize user into the session
 init()
 
-module.exports = passport
+export default passport
