@@ -1,4 +1,4 @@
-const ids = {
+export const config = {
   github: {
     clientID: process.env.GITHUB_CLIENT_ID_DEV || process.env.GITHUB_CLIENT_ID,
     clientSecret: process.env.GITHUB_CLIENT_SECRET_DEV || process.env.GITHUB_CLIENT_SECRET,
@@ -15,5 +15,3 @@ const ids = {
     callbackURL: process.env.CALLBACK_DEV_GOOGLE || "https://vote-on-it.now.sh/auth/google/callback"
   }
 }
-
-module.exports = ids

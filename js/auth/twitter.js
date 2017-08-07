@@ -2,7 +2,7 @@ const passport = require('passport')
 const TwitterStrategy = require('passport-twitter').Strategy
 
 const User = require('../models/user')
-const config = require('./config')
+import { config } from './config'
 const init = require('./init')
 
 passport.use(new TwitterStrategy({
