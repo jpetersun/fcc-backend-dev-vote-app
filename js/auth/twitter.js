@@ -1,5 +1,5 @@
 import passport from 'passport'
-const TwitterStrategy = require('passport-twitter').Strategy
+import { Strategy as TwitterStrategy } from 'passport-twitter'
 
 const User = require('../models/user')
 import { config } from './config'

@@ -1,5 +1,5 @@
 import passport from 'passport'
-const GoogleStrategy = require('passport-google-oauth20').Strategy
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20'
 
 const User = require('../models/user')
 import { config } from './config'

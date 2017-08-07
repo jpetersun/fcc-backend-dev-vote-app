@@ -1,5 +1,5 @@
 import passport from 'passport'
-const GitHubStrategy = require('passport-github2').Strategy
+import { Strategy as GitHubStrategy } from 'passport-github2'
 
 const User = require('../models/user')
 import { config } from './config'
