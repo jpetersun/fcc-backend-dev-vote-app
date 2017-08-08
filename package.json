@@ -4,7 +4,7 @@
   "description": "A voting app for FreeCodeCamp's Backend Certfication",
   "main": "index.js",
   "scripts": {
-    "start": "PORT=3001 babel-node app.js",
+    "start": "PORT=3000 babel-node app.js",
     "test": "mocha --reporter nyan --compilers js:babel-core/register test/test.js"
   },
   "now": {

@@ -1,22 +1,20 @@
-require('babel-register')
+import 'babel-register'
 
-const express = require('express')
-const React = require('react')
-const ReactDOMServer = require('react-dom/server')
-const ReactRouter = require('react-router')
-const match = ReactRouter.match
-const RouterContext = ReactRouter.RouterContext
-const _ = require('lodash')
-const fs = require('fs')
+import express from 'express'
+import React from 'react'
+import ReactDOMServer from 'react-dom/server'
+import { ReactRouter, match, RouterContext } from 'react-router'
+import _ from 'lodash'
+import fs from 'fs'
 const baseTemplate = fs.readFileSync('./index.html')
 const template = _.template(baseTemplate)
-const ClientApp = require('./js/ClientApp.jsx')
+import ClientApp from './js/ClientApp.jsx'
 const Routes = ClientApp.Routes
-const bodyParser = require('body-parser')
-const session = require('express-session')
-const passport = require('passport')
+import bodyParser from 'body-parser'
 
-const mongoose = require('mongoose')
+import session from 'express-session'
+import passport from 'passport'
+import mongoose from 'mongoose'
 import { router } from './js/routes/index'
 import { authRouter } from './js/routes/index-auth'
 const app = express()
@@ -30,7 +28,6 @@ app.use(passport.session())
 
 app.use('/', [router, authRouter])
 
-// console.log(process.env.DATABASE)
 mongoose.connect(process.env.DATABASE || 'mongodb://localhost:27017/vote-app')
 
 app.use((req, res) => {
@@ -49,7 +46,7 @@ app.use((req, res) => {
   })
 })
 
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 3001
 console.log('listening on portorino ' + port)
 app.listen(port)
 
