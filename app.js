@@ -8,7 +8,6 @@ const match = ReactRouter.match
 const RouterContext = ReactRouter.RouterContext
 const _ = require('lodash')
 const fs = require('fs')
-const port = 3000
 const baseTemplate = fs.readFileSync('./index.html')
 const template = _.template(baseTemplate)
 const ClientApp = require('./js/ClientApp.jsx')
@@ -50,6 +49,7 @@ app.use((req, res) => {
   })
 })
 
+const port = process.env.PORT || 3000
 console.log('listening on portorino ' + port)
 app.listen(port)
 
