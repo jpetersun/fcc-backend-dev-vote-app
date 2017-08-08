@@ -1,8 +1,9 @@
 import 'babel-polyfill'
 
-const app = require('../app')
-const request = require('supertest')
-const expect = require('chai').expect
+
+import { app } from '../app'
+import request from 'supertest'
+import { expect } from 'chai'
 import { User } from '../js/models/user'
 
 // Fake authentication

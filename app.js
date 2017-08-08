@@ -50,4 +50,4 @@ const port = process.env.PORT || 3001
 console.log('listening on portorino ' + port)
 app.listen(port)
 
-module.exports = app
+export { app }
