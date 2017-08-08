@@ -4,10 +4,10 @@ import { authRouter } from './index-auth'
 
 import ip from 'ip'
 import { User } from '../models/user'
-const sanitizer = require('sanitizer')
-const _ = require('lodash')
+import sanitizer from 'sanitizer'
+import _ from 'lodash'
 
-router.get('/account-details', authRouter.ensureAuthenticated, function (req, res) {
+router.get('/account-details', authRouter.ensureAuthenticated, (req, res) => {
   const theUser = User.findOne({ someID: req.user.someID })
   theUser.then((user) => {
     res.json(user)
