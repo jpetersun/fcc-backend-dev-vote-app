@@ -1,4 +1,6 @@
 import mongoose from 'mongoose'
+mongoose.Promise = global.Promise
+
 import { pollSchema } from './poll'
 
 const userSchema = new mongoose.Schema({
