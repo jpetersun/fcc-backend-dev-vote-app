@@ -18,8 +18,8 @@ const session = require('express-session')
 const passport = require('passport')
 
 const mongoose = require('mongoose')
-const router = require('./js/routes/index')
-const authRouter = require('./js/routes/index-auth')
+import { router } from './js/routes/index'
+import { authRouter } from './js/routes/index-auth'
 const app = express()
 
 app.use('/public', express.static('./public'))

@@ -1,4 +1,4 @@
-const express = require('express')
+import express from 'express'
 const authRouter = express.Router()
 
 import passportGithub from '../auth/github'
@@ -43,4 +43,4 @@ authRouter.get('/auth/google/callback',
     delete req.session.returnTo
   })
 
-module.exports = authRouter
+export { authRouter }

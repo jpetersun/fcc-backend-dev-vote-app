@@ -1,8 +1,8 @@
-const express = require('express')
+import express from 'express'
 const router = express.Router()
-const authRouter = require('./index-auth')
+import { authRouter } from './index-auth'
 
-const ip = require('ip')
+import ip from 'ip'
 import { User } from '../models/user'
 const sanitizer = require('sanitizer')
 const _ = require('lodash')
@@ -122,4 +122,4 @@ router.delete('/user-poll/:userId/:id', (req, res) => {
   })
 })
 
-module.exports = router
+export { router }
