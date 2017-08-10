@@ -55,33 +55,29 @@ router.post('/create-poll', authRouter.ensureAuthenticated, (req, res) => {
 
   const theUser = User.findOne({_id: id})
   theUser.then((user) => {
-    const options = []
-
-    // Sanitize user input
-    req.body.values = req.body.values.map(value => {
-      return sanitizer.sanitize(value)
-    })
-
-    req.body.values.forEach((value) => {
-      options.push({
-        name: value,
+    const options = req.body.values.map(value => {
+      return {
+        name: sanitizer.sanitize(value),
         votes: 0,
         color: '#' + (Math.random() * 0xFFFFFF << 0).toString(16)
-      })
+      }
     })
 
     const newPoll = {
       name: sanitizer.sanitize(req.body.name),
       options: options
     }
+
     user.polls.push(newPoll)
+
     user.save((err, user) => {
       if (err) return console.error(err)
+      res.json(newPoll)
     })
-    res.json(newPoll)
   })
-  // res.redirect('/')
-  // res.json(newPoll)
+  .catch(err => {
+    console.log('error:', err)
+  })
 })
 
 router.put('/poll-results/:userId/:id', (req, res) => {

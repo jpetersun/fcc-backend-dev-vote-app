@@ -26,7 +26,7 @@ app.use(session({secret: 'keyboard cat', resave: false, saveUninitialized: false
 app.use(passport.initialize())
 app.use(passport.session())
 
-app.use('/', [router, authRouter])
+app.use([router, authRouter])
 
 mongoose.connect(process.env.DATABASE || 'mongodb://localhost:27017/vote-app')
 
