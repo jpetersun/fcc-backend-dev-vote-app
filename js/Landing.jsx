@@ -1,7 +1,7 @@
-const React = require('react')
-const Poll = require('./Poll')
+import React from 'react'
+import Poll from './Poll'
 
-const axios = require('axios')
+import axios from 'axios'
 
 const ul = {
   listStyleType: 'none',
@@ -46,4 +46,4 @@ class Landing extends React.Component {
   }
 }
 
-module.exports = Landing
+export default Landing

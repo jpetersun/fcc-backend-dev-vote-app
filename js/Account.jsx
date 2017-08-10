@@ -1,6 +1,6 @@
-const React = require('react')
-const UserPolls = require('./UserPolls')
-const axios = require('axios')
+import React from 'react'
+import UserPolls from './UserPolls'
+import axios from 'axios'
 
 const ul = {
   listStyleType: 'none',
@@ -61,4 +61,4 @@ class Account extends React.Component {
   }
 }
 
-module.exports = Account
+export default Account

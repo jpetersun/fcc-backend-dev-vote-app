@@ -11,7 +11,7 @@ const template = _.template(baseTemplate)
 import ClientApp from './js/ClientApp.jsx'
 const Routes = ClientApp.Routes
 import bodyParser from 'body-parser'
-
+import morgan from 'morgan'
 import session from 'express-session'
 import passport from 'passport'
 import mongoose from 'mongoose'
@@ -22,6 +22,7 @@ const app = express()
 app.use('/public', express.static('./public'))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
+app.use(morgan('dev'))
 app.use(session({secret: 'keyboard cat', resave: false, saveUninitialized: false}))
 app.use(passport.initialize())
 app.use(passport.session())

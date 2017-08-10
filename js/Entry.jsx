@@ -1,7 +1,7 @@
-const React = require('react')
-const ReactDOM = require('react-dom')
-const App = require('./ClientApp')
-const { match } = require('react-router')
+import React from 'react'
+import ReactDOM from 'react-dom'
+import App from './ClientApp'
+import { match } from 'react-router'
 
 match({ history: App.History, routes: App.Routes }, (error, redirectLocation, renderProps) => {
   if (error) {

@@ -1,6 +1,7 @@
-const React = require('react')
-const axios = require('axios')
-const ReactCSSTransitionGroup = require('react-addons-css-transition-group')
+import React from 'react'
+import axios from 'axios'
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group'
+
 const inputStyle = {
   display: 'flex',
   flexDirection: 'row',
@@ -118,4 +119,4 @@ class CreatePoll extends React.Component {
   }
 }
 
-module.exports = CreatePoll
+export default CreatePoll

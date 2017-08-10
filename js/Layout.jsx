@@ -1,5 +1,5 @@
-const React = require('react')
-const MenuIcon = require('./MenuIcon')
+import React from 'react'
+import MenuIcon from './MenuIcon'
 
 const { element, bool } = React.PropTypes
 
@@ -102,4 +102,4 @@ Layout.propTypes = {
   children: element.isRequired
 }
 
-module.exports = Layout
+export default Layout

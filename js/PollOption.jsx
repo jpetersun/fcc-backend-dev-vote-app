@@ -1,6 +1,6 @@
-const React = require('react')
+import React from 'react'
 
-const PollOption = (props) => {
+export const PollOption = (props) => {
   return (
     <option value={props.name} name={props.name}>{props.name}</option>
   )
@@ -12,4 +12,4 @@ PollOption.propTypes = {
   name: string.isRequired,
   _id: string.isRequired
 }
-module.exports = PollOption
+

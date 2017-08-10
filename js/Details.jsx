@@ -1,5 +1,5 @@
 const React = require('react')
-const PollOption = require('./PollOption')
+import { PollOption } from './PollOption'
 const axios = require('axios')
 const _ = require('lodash')
 

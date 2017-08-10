@@ -1,4 +1,4 @@
-const React = require('react')
+import React from 'react'
 
 const Login = (props) => {
   return (
@@ -31,4 +31,4 @@ const Login = (props) => {
   )
 }
 
-module.exports = Login
+export default Login

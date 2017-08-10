@@ -14,4 +14,4 @@ const MenuIcon = (props) => {
   )
 }
 
-module.exports = MenuIcon
+export default MenuIcon

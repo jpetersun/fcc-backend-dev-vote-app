@@ -1,6 +1,6 @@
-const React = require('react')
-const { Link } = require('react-router')
-const axios = require('axios')
+import React from 'react'
+import { Link } from 'react-router'
+import axios from 'axios'
 
 const link = {
   color: '#000'
@@ -132,4 +132,4 @@ UserPolls.propTypes = {
   unmountMe: func.isRequired
 }
 
-module.exports = UserPolls
+export default UserPolls

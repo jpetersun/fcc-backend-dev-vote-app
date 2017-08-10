@@ -1,6 +1,11 @@
-const React = require('react')
-const Layout = require('./Layout')
-const { Router, browserHistory } = require('react-router')
+import React from 'react'
+import Layout from './Layout'
+import { Router, browserHistory } from 'react-router'
+import Landing from './Landing'
+import Details from './Details'
+import CreatePoll from './CreatePoll'
+import Login from './Login'
+import Account from './Account'
 
 if (typeof module !== 'undefined' && module.require) {
   if (typeof require.ensure === 'undefined') {
@@ -14,7 +19,7 @@ const rootRoute = {
   indexRoute: {
     getComponent (location, cb) {
       require.ensure([], () => {
-        cb(null, require('./Landing'))
+        cb(null, Landing)
       })
     }
   },
@@ -23,7 +28,7 @@ const rootRoute = {
       path: 'details/:userId/:id',
       getComponent (location, cb) {
         require.ensure([], () => {
-          cb(null, require('./Details'))
+          cb(null, Details)
         })
       }
     },
@@ -31,7 +36,7 @@ const rootRoute = {
       path: 'create-poll',
       getComponent (location, cb) {
         require.ensure([], () => {
-          cb(null, require('./CreatePoll'))
+          cb(null, CreatePoll)
         })
       }
     },
@@ -39,7 +44,7 @@ const rootRoute = {
       path: 'login',
       getComponent (location, cb) {
         require.ensure([], () => {
-          cb(null, require('./Login'))
+          cb(null, Login)
         })
       }
     },
@@ -47,7 +52,7 @@ const rootRoute = {
       path: 'account',
       getComponent (location, cb) {
         require.ensure([], () => {
-          cb(null, require('./Account'))
+          cb(null, Account)
         })
       }
     }
@@ -65,4 +70,4 @@ const App = React.createClass({
 App.Routes = rootRoute
 App.History = browserHistory
 
-module.exports = App
+export default App

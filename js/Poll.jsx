@@ -1,5 +1,5 @@
-const React = require('react')
-const { Link } = require('react-router')
+import React from 'react'
+import { Link } from 'react-router'
 
 const linkStyle = {
   color: '#000'
@@ -25,4 +25,4 @@ Poll.propTypes = {
   userId: string.isRequired
 }
 
-module.exports = Poll
+export default Poll
