@@ -136,4 +136,4 @@ Details.propTypes = {
   pollData: object
 }
 
-module.exports = Details
+export default Details

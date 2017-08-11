@@ -6,6 +6,7 @@ import ip from 'ip'
 import { User } from '../models/user'
 import sanitizer from 'sanitizer'
 import _ from 'lodash'
+import randomColor from 'random-color'
 
 router.get('/account-details', authRouter.ensureAuthenticated, (req, res) => {
   const theUser = User.findOne({ someID: req.user.someID })
@@ -59,7 +60,7 @@ router.post('/create-poll', authRouter.ensureAuthenticated, (req, res) => {
       return {
         name: sanitizer.sanitize(value),
         votes: 0,
-        color: '#' + (Math.random() * 0xFFFFFF << 0).toString(16)
+        color: randomColor(0.99, 0.99).hexString()
       }
     })
 
