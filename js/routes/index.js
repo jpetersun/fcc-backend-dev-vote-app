@@ -73,7 +73,7 @@ router.post('/create-poll', authRouter.ensureAuthenticated, (req, res) => {
 
     user.save((err, user) => {
       if (err) return console.error(err)
-      res.json(newPoll)
+      res.status(201).json(newPoll)
     })
   })
   .catch(err => {
