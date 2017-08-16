@@ -9,6 +9,32 @@ if (typeof window === 'undefined') {
 
 const Doughnut = require('react-chartjs-2').Doughnut
 
+function WarningBanner (props) {
+  if (!props.warn) {
+    return null
+  }
+
+  const warningStyle = {
+    margin: '1rem auto',
+    color: 'crimson',
+    border: '1px solid crimson',
+    backgroundColor: 'white',
+    position: 'relative'
+  }
+
+  return (
+    <div className='warning' style={warningStyle}>
+      You already voted
+    </div>
+  )
+}
+
+const { bool } = React.PropTypes
+
+WarningBanner.propTypes = {
+  warn: bool
+}
+
 class Details extends React.Component {
   constructor (props) {
     super(props)
@@ -33,7 +59,8 @@ class Details extends React.Component {
             ''
           ]
         }]
-      }
+      },
+      showWarning: false
     }
     this.value = ''
     this.handleChange = this.handleChange.bind(this)
@@ -54,28 +81,29 @@ class Details extends React.Component {
       _id: id
     })
     .then((response) => {
-      if (typeof response.data === 'string') {
-        window.alert(response.data)
-      }
-      axios.get(`/polls/${this.props.params.userId}/${this.props.params.id}`)
-        .then((response) => {
-          const data = response.data[0]
-          const labels = data.options.map(option => option.name)
-          const votes = data.options.map(option => option.votes)
-          const colors = data.options.map(option => option.color)
-          this.setState({chartData:
-          {
-            labels: labels,
-            datasets: [{
-              data: votes,
-              backgroundColor: colors
-            }]
-          }
+      if (response.data === 'Already voted') {
+        this.setState({ showWarning: true })
+      } else {
+        axios.get(`/polls/${this.props.params.userId}/${this.props.params.id}`)
+          .then((response) => {
+            const data = response.data[0]
+            const labels = data.options.map(option => option.name)
+            const votes = data.options.map(option => option.votes)
+            const colors = data.options.map(option => option.color)
+            this.setState({chartData:
+            {
+              labels: labels,
+              datasets: [{
+                data: votes,
+                backgroundColor: colors
+              }]
+            }
+            })
           })
+        .catch((error) => {
+          console.error('axios error', error)
         })
-      .catch((error) => {
-        console.error('axios error', error)
-      })
+      }
     })
     .catch((error) => {
       console.error('axios error', error)
@@ -112,6 +140,7 @@ class Details extends React.Component {
   render () {
     return (
       <div>
+        <WarningBanner warn={this.state.showWarning} />
         <Doughnut ref='canvas' data={this.state.chartData} />
         <form onSubmit={this.handleSubmit} method='put' action='/poll-results'>
           <label>

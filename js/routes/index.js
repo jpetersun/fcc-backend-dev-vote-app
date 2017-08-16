@@ -96,7 +96,7 @@ router.put('/poll-results/:userId/:id', (req, res) => {
     const option = _.find(thePoll.options, {name: req.body.name})
     const poll = thePoll
     if (poll.votersIpAddress.indexOf(ip.address()) >= 0) {
-      res.send('You already voted')
+      res.send('Already voted')
     } else {
       poll.votersIpAddress.push(ip.address())
       option.votes += 1
