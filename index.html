@@ -15,6 +15,12 @@
     </div>
   </div>
   <script async src="/public/bundlerino.js"></script>
-  <script src="http://localhost:35729/livereload.js"></script>
+  <script>
+    if (document.URL.includes("3000")) {
+      var liveReloadScript = document.createElement("script")
+      liveReloadScript.src = "http://localhost:35729/livereload.js"
+      document.body.appendChild(liveReloadScript)
+    }
+  </script>
 </body>
 </html>
