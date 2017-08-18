@@ -13,6 +13,9 @@ router.get('/account-details', authRouter.ensureAuthenticated, (req, res) => {
   theUser.then((user) => {
     res.json(user)
   })
+  .catch(err => {
+    console.error('Mongoose Error', err)
+  })
 })
 
 // console.log(allPolls.then)
@@ -20,6 +23,9 @@ router.get('/polls', (req, res) => {
   const users = User.find({})
   users.then((user) => {
     res.send(user)
+  })
+  .catch(err => {
+    console.error('Mongoose Error', err)
   })
 })
 
@@ -32,6 +38,9 @@ router.get('/polls/:userId/:id', (req, res) => {
     })
     // console.log(thePoll)
     res.send(thePoll)
+  })
+  .catch(err => {
+    console.error('Mongoose Error', err)
   })
 })
 
@@ -116,6 +125,9 @@ router.delete('/user-poll/:userId/:id', (req, res) => {
     user.polls = filteredPolls
     user.save()
     res.json(user.polls)
+  })
+  .catch(err => {
+    console.error('Mongoose Error', err)
   })
 })
 
