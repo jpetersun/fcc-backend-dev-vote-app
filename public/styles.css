@@ -67,7 +67,6 @@ li {
 ul a:hover {
   text-decoration: underline;
   text-decoration-color: gray;
-  text-underline-position: under;
 }
 
 .navigation {
