@@ -8,7 +8,7 @@ dependencies:
   ip: 1.1.5
   lodash: 4.17.10
   micro: 9.3.2
-  mongodb: 2.2.36
+  mongodb: 3.1.1
   mongoose: 4.13.14
   morgan: 1.9.0
   node-ensure: 0.0.0
@@ -4804,13 +4804,15 @@ packages:
     dev: false
     resolution:
       integrity: sha1-TEYTm986HwMt7ZHbSfOO7AFlkFA=
-  /mongodb-core/2.1.20:
+  /mongodb-core/3.1.0:
     dependencies:
       bson: 1.0.9
       require_optional: 1.0.1
     dev: false
+    optionalDependencies:
+      saslprep: 1.0.1
     resolution:
-      integrity: sha512-IN57CX5/Q1bhDq6ShAR6gIv4koFsZP7L8WOK1S0lR0pVDQaScffSMV5jxubLsmZ7J+UdqmykKw4r9hG3XQEGgQ==
+      integrity: sha512-qRjG62Fu//CZhkgn0jA/k8jh5MhACIq8cOJUryH6sck87pgt+C222MSD02tsCq5zNo/B6ZFHtNodZ2qpf8E86g==
   /mongodb/2.2.34:
     dependencies:
       es6-promise: 3.2.1
@@ -4821,16 +4823,14 @@ packages:
       node: '>=0.10.3'
     resolution:
       integrity: sha1-o09Zu+thdUrsQy3nLD/iFSakTBo=
-  /mongodb/2.2.36:
+  /mongodb/3.1.1:
     dependencies:
-      es6-promise: 3.2.1
-      mongodb-core: 2.1.20
-      readable-stream: 2.2.7
+      mongodb-core: 3.1.0
     dev: false
     engines:
-      node: '>=0.10.3'
+      node: '>=4'
     resolution:
-      integrity: sha512-P2SBLQ8Z0PVx71ngoXwo12+FiSfbNfGOClAao03/bant5DgLNkOPAck5IaJcEk4gKlQhDEURzfR3xuBG1/B+IA==
+      integrity: sha512-GU9oWK4pi8PC7NyGiwjFMwZyMqwGWoMEMvM0LZh7UKW/FFAqgmZKjjriD+5MEOCDUJE2dtHX93/K5UtDxO0otg==
   /mongoose/4.13.14:
     dependencies:
       async: 2.6.0
@@ -6478,6 +6478,13 @@ packages:
     dev: false
     resolution:
       integrity: sha1-1PCvdHXZp7ryqeWmEXGLqheKOeE=
+  /saslprep/1.0.1:
+    dev: false
+    engines:
+      node: '>=6'
+    optional: true
+    resolution:
+      integrity: sha512-ntN6SbE3hRqd45PKKadRPgA+xHPWg5lPSj2JWJdJvjTwXDDfkPVtXWvP8jJojvnm+rAsZ2b299C5NwZqq818EA==
   /sax/1.2.4:
     dev: true
     resolution:
@@ -7708,7 +7715,7 @@ specifiers:
   lodash-webpack-plugin: ^0.11.2
   micro: latest
   mocha: ^3.2.0
-  mongodb: ^2.2.23
+  mongodb: ^3.1.1
   mongoose: ^4.8.2
   morgan: ^1.8.2
   node-ensure: 0.0.0

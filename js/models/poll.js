@@ -10,4 +10,4 @@ export const pollSchema = mongoose.Schema({
   },
   options: [optionSchema],
   votersIpAddress: Array
-})
+},{usePushEach: true})
