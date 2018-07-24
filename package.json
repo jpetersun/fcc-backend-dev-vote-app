@@ -33,7 +33,7 @@
     "ip": "^1.1.5",
     "lodash": "^4.17.4",
     "micro": "latest",
-    "mongodb": "^2.2.23",
+    "mongodb": "^3.1.1",
     "mongoose": "^4.8.2",
     "morgan": "^1.8.2",
     "node-ensure": "0.0.0",
