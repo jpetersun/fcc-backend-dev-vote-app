@@ -11,22 +11,6 @@ const Login = (props) => {
           Login with GitHub
         </a>
       </div>
-      <div className='auth-link'>
-        <a href='/auth/twitter'>
-          <img className='twitter-mark' src='/public/icons/twitter-icon.png' alt='Twitter' />
-        </a>
-        <a className='auth-twitter' href='/auth/twitter'>
-          Login with Twitter
-        </a>
-      </div>
-      <div className='auth-link'>
-        <a href='/auth/google'>
-          <img className='google-mark' src='/public/icons/google-mark.png' alt='Google' />
-        </a>
-        <a className='auth-google' href='/auth/google'>
-          Login with Google
-        </a>
-      </div>
     </div>
   )
 }

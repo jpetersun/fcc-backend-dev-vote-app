@@ -2,8 +2,6 @@ import express from 'express'
 const authRouter = express.Router()
 
 import passportGithub from '../auth/github'
-import passportTwitter from '../auth/twitter'
-import passportGoogle from '../auth/google'
 
 authRouter.ensureAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) { return next() }
@@ -20,24 +18,6 @@ authRouter.get('/auth/github', passportGithub.authenticate('github', { scope: [ 
 
 authRouter.get('/auth/github/callback',
   passportGithub.authenticate('github', { failureRedirect: '/login' }),
-  (req, res) => {
-    res.redirect(req.session.returnTo || '/')
-    delete req.session.returnTo
-  })
-
-authRouter.get('/auth/twitter', passportTwitter.authenticate('twitter'))
-
-authRouter.get('/auth/twitter/callback',
-  passportTwitter.authenticate('twitter', { failureRedirect: '/login' }),
-  (req, res) => {
-    res.redirect(req.session.returnTo || '/')
-    delete req.session.returnTo
-  })
-
-authRouter.get('/auth/google', passportGoogle.authenticate('google', { scope: ['profile'] }))
-
-authRouter.get('/auth/google/callback',
-  passportGoogle.authenticate('google', { failureRedirect: '/login' }),
   (req, res) => {
     res.redirect(req.session.returnTo || '/')
     delete req.session.returnTo
