@@ -29,7 +29,9 @@ app.use(passport.session())
 
 app.use([router, authRouter])
 
-mongoose.connect(process.env.DATABASE || 'mongodb://localhost:27017/vote-app')
+mongoose.connect(process.env.DATABASE || 'mongodb://localhost:27017/vote-app', {
+  useMongoClient: true
+})
 
 app.use((req, res) => {
   match({routes: Routes, location: req.url}, (error, redirectLocation, renderProps) => {
