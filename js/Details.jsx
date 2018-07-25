@@ -81,6 +81,7 @@ class Details extends React.Component {
       _id: id
     })
     .then((response) => {
+      // TODO: limit voting
       if (response.data === 'Already voted') {
         this.setState({ showWarning: true })
       } else {

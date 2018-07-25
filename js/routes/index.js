@@ -2,7 +2,6 @@ import express from 'express'
 const router = express.Router()
 import { authRouter } from './index-auth'
 
-import ip from 'ip'
 import { User } from '../models/user'
 import sanitizer from 'sanitizer'
 import _ from 'lodash'
@@ -103,14 +102,10 @@ router.put('/poll-results/:userId/:id', (req, res) => {
     const option = _.find(thePoll.options, {name: req.body.name})
     const poll = thePoll
 
-    if (poll.votersIpAddress.indexOf(ip.address()) >= 0) {
-      res.send('Already voted')
-    } else {
-      poll.votersIpAddress.push(ip.address())
-      option.votes += 1
-      user.save()
-      res.send(option)
-    }
+    // TODO: limit voting
+    option.votes += 1
+    user.save()
+    res.send(option)
   })
 })
 
