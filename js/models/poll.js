@@ -8,6 +8,5 @@ export const pollSchema = mongoose.Schema({
     type: String,
     required: true
   },
-  options: [optionSchema],
-  votersIpAddress: Array
-},{usePushEach: true})
+  options: [optionSchema]
+}, {usePushEach: true})
