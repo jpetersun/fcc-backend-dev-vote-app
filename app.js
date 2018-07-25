@@ -49,8 +49,8 @@ app.use((req, res) => {
   })
 })
 
-const port = process.env.PORT || 3001
-console.log('listening on portorino ' + port)
-app.listen(port)
+const PORT = process.env.PORT || 3001
+console.log(`listening on port ${PORT}`)
+app.listen(PORT)
 
 export { app }
