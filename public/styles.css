@@ -245,6 +245,7 @@ main {
   border: 1px solid #E91E63;
   color: #E91E63;
   max-width: 70px;
+  cursor: default;
 }
 
 .warning {
