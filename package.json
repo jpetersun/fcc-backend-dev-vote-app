@@ -6,7 +6,7 @@
   "scripts": {
     "start": "PORT=3000 babel-node app.js",
     "dev": "PORT=3005 nodemon app.js --exec babel-node",
-    "test": "mocha --reporter nyan --compilers js:babel-core/register test/test.js"
+    "test": "PORT=3005 mocha --reporter nyan --compilers js:babel-core/register test/test.js"
   },
   "keywords": [],
   "author": "James peterson <jpeterson903@yahoo.com",
@@ -18,7 +18,6 @@
     "express": "^4.14.1",
     "express-session": "^1.15.1",
     "express-sessions": "^1.0.6",
-    "ip": "^1.1.5",
     "lodash": "^4.17.4",
     "micro": "latest",
     "mongodb": "^3.1.1",
