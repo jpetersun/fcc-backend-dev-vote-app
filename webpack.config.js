@@ -5,7 +5,7 @@ const LodashModuleReplacementPlugin = require('lodash-webpack-plugin')
 
 module.exports = {
   context: __dirname,
-  entry: './js/Entry.jsx',
+  entry: './src/Entry.jsx',
   output: {
     path: path.join(__dirname, '/public'),
     filename: 'bundlerino.js',

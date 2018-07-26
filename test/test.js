@@ -4,7 +4,7 @@ import 'babel-polyfill'
 import { app } from '../app'
 import request from 'supertest'
 import { expect } from 'chai'
-import { User } from '../js/models/user'
+import { User } from '../src/models/user'
 
 // Fake authentication
 app.request.isAuthenticated = () => {

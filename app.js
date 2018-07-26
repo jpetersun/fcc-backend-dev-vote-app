@@ -11,15 +11,15 @@ import _ from 'lodash'
 import fs from 'fs'
 const baseTemplate = fs.readFileSync('./index.html')
 const template = _.template(baseTemplate)
-import ClientApp from './js/ClientApp.jsx'
+import ClientApp from './src/ClientApp.jsx'
 const Routes = ClientApp.Routes
 import bodyParser from 'body-parser'
 import morgan from 'morgan'
 import session from 'express-session'
 import passport from 'passport'
 import mongoose from 'mongoose'
-import { router } from './js/routes/index'
-import { authRouter } from './js/routes/index-auth'
+import { router } from './src/routes/index'
+import { authRouter } from './src/routes/index-auth'
 const app = express()
 
 app.use('/public', express.static('./public'))
