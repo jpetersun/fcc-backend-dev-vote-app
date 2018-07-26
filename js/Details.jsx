@@ -76,17 +76,20 @@ class Details extends React.Component {
     const obj = _.find(this.state.pollData.options, {name: value})
     const name = obj.name
     const id = obj._id
+
     axios.put(`/poll-results/${this.props.params.userId}/${this.props.params.id}`, {
       name: name,
       _id: id
     })
     .then((response) => {
-      // TODO: limit voting
-      if (response.data === 'Already voted') {
+      // Check if user voted on this poll using localStorage
+      if (window.localStorage.getItem(`${this.props.params.id}`) === 'voted') {
         this.setState({ showWarning: true })
       } else {
         axios.get(`/polls/${this.props.params.userId}/${this.props.params.id}`)
           .then((response) => {
+            // Use localStorage to set which poll the user has been voted on
+            window.localStorage.setItem(`${this.props.params.id}`, 'voted')
             const data = response.data[0]
             const labels = data.options.map(option => option.name)
             const votes = data.options.map(option => option.votes)
@@ -116,7 +119,6 @@ class Details extends React.Component {
     axios.get(`/polls/${this.props.params.userId}/${this.props.params.id}`)
       .then((response) => {
         const data = response.data[0]
-        // console.log(data)
         const labels = data.options.map(option => option.name)
         const votes = data.options.map(option => option.votes)
         const colors = data.options.map(option => option.color)
