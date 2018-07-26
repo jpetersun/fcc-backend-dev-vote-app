@@ -100,9 +100,7 @@ router.put('/poll-results/:userId/:id', (req, res) => {
     }).pop()
 
     const option = _.find(thePoll.options, {name: req.body.name})
-    const poll = thePoll
 
-    // TODO: limit voting
     option.votes += 1
     user.save()
     res.send(option)
