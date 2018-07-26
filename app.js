@@ -1,5 +1,8 @@
 import 'babel-register'
 
+import dotenv from 'dotenv'
+dotenv.config()
+
 import express from 'express'
 import React from 'react'
 import ReactDOMServer from 'react-dom/server'
@@ -49,7 +52,7 @@ app.use((req, res) => {
   })
 })
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT || 3000
 console.log(`listening on port ${PORT}`)
 app.listen(PORT)
 
