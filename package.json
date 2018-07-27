@@ -19,6 +19,7 @@
     "express": "^4.14.1",
     "express-session": "^1.15.1",
     "express-sessions": "^1.0.6",
+    "helmet": "^3.13.0",
     "lodash": "^4.17.4",
     "micro": "latest",
     "mongodb": "^3.1.1",

@@ -18,6 +18,7 @@ import morgan from 'morgan'
 import session from 'express-session'
 import passport from 'passport'
 import mongoose from 'mongoose'
+import helmet from 'helmet'
 import { router } from './src/routes/index'
 import { authRouter } from './src/routes/index-auth'
 const app = express()
@@ -29,6 +30,7 @@ app.use(morgan('dev'))
 app.use(session({secret: 'keyboard cat', resave: false, saveUninitialized: false}))
 app.use(passport.initialize())
 app.use(passport.session())
+app.use(helmet())
 
 app.use([router, authRouter])
 
