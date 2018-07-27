@@ -72,6 +72,13 @@ class Details extends React.Component {
   }
 
   handleSubmit (event) {
+    event.preventDefault()
+    // Check if user voted on this poll using localStorage
+    if (window.localStorage.getItem(`${this.props.params.id}`) === 'voted') {
+      this.setState({ showWarning: true })
+      return null
+    }
+
     const value = this.value
     const obj = _.find(this.state.pollData.options, {name: value})
     const name = obj.name
@@ -82,37 +89,33 @@ class Details extends React.Component {
       _id: id
     })
     .then((response) => {
-      // Check if user voted on this poll using localStorage
-      if (window.localStorage.getItem(`${this.props.params.id}`) === 'voted') {
-        this.setState({ showWarning: true })
-      } else {
-        axios.get(`/polls/${this.props.params.userId}/${this.props.params.id}`)
-          .then((response) => {
-            // Use localStorage to set which poll the user has been voted on
-            window.localStorage.setItem(`${this.props.params.id}`, 'voted')
-            const data = response.data[0]
-            const labels = data.options.map(option => option.name)
-            const votes = data.options.map(option => option.votes)
-            const colors = data.options.map(option => option.color)
-            this.setState({chartData:
-            {
-              labels: labels,
-              datasets: [{
-                data: votes,
-                backgroundColor: colors
-              }]
-            }
-            })
+      // second fetch to update doughtnut chart view
+      axios.get(`/polls/${this.props.params.userId}/${this.props.params.id}`)
+        .then((response) => {
+          // Use localStorage to set which poll the user has been voted on
+          window.localStorage.setItem(`${this.props.params.id}`, 'voted')
+
+          const data = response.data[0]
+          const labels = data.options.map(option => option.name)
+          const votes = data.options.map(option => option.votes)
+          const colors = data.options.map(option => option.color)
+          this.setState({chartData:
+          {
+            labels: labels,
+            datasets: [{
+              data: votes,
+              backgroundColor: colors
+            }]
+          }
           })
-        .catch((error) => {
-          console.error('axios error', error)
         })
-      }
+      .catch((error) => {
+        console.error('axios error', error)
+      })
     })
     .catch((error) => {
       console.error('axios error', error)
     })
-    event.preventDefault()
   }
 
   componentDidMount () {
